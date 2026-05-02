@@ -36,7 +36,7 @@ export default function Footer() {
       </div>
 
       <div className="footer-bottom">
-        <p>© {new Date().getFullYear()} Achadinhos do Pai</p>
+        <p>© {new Date().getFullYear()} Achadinhos do Pai · <a href="https://my-portfolio-dj0ckukvl-vitormoratoz.vercel.app/#" target="_blank" rel="noopener noreferrer" className="footer-dev-link">Desenvolvido por Moratz Programming</a></p>
         <p className="disclaimer">
           Indicamos só o que realmente vale a pena. Quando você compra pelo nosso link, recebemos uma pequena comissão — sem nenhum custo extra pra você. É assim que mantemos esse trabalho vivo. Valeu pelo apoio!
         </p>

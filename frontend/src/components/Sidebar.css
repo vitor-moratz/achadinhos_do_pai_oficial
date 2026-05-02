@@ -1,19 +1,23 @@
 .sidebar {
   width: 200px;
   flex-shrink: 0;
-  position: sticky;
-  top: 0;
-  height: calc(100vh);
-  overflow-y: auto;
-  padding: 20px 12px 24px;
+  position: fixed;
+  top: 104px;
+  left: 0;
+  bottom: 0;
   border-right: 1px solid var(--clr-border);
   background: var(--clr-white);
   z-index: 50;
+  overflow-y: auto;
   scrollbar-width: none;
 }
 
 .sidebar::-webkit-scrollbar {
   display: none;
+}
+
+.sidebar-sticky {
+  padding: 20px 12px 24px;
 }
 
 .sidebar-label {

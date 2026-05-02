@@ -50,6 +50,22 @@
   flex-shrink: 0;
 }
 
+.header-social-icon {
+  text-decoration: none;
+  padding: 10px;
+  border-radius: var(--radius-sm);
+  transition: background 0.2s, color 0.2s;
+  color: var(--clr-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.header-social-icon:hover {
+  background: #FFF7ED;
+  color: var(--clr-primary-dark);
+}
+
 .header-cta {
   background: var(--clr-primary);
   color: var(--clr-white);

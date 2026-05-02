@@ -1,0 +1,132 @@
+/* ── BASE ───────────────────────────────────────────── */
+.cselect {
+  position: relative;
+  display: block;
+}
+
+.cselect-trigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  width: 100%;
+  padding: 10px 12px;
+  background: var(--clr-white);
+  border: 1.5px solid var(--clr-border);
+  border-radius: var(--radius-sm);
+  font-size: 0.9rem;
+  font-family: inherit;
+  color: var(--clr-text);
+  cursor: pointer;
+  text-align: left;
+  line-height: 1.4;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.cselect-trigger:hover,
+.cselect--open .cselect-trigger {
+  border-color: var(--clr-primary);
+}
+
+.cselect--open .cselect-trigger {
+  box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.12);
+}
+
+.cselect-value {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cselect-ph {
+  color: var(--clr-text-muted);
+}
+
+.cselect-arrow {
+  flex-shrink: 0;
+  color: var(--clr-text-muted);
+  transition: transform 0.2s;
+}
+
+.cselect--open .cselect-arrow {
+  transform: rotate(180deg);
+}
+
+/* ── DROPDOWN LIST ──────────────────────────────────── */
+.cselect-list {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  min-width: 100%;
+  background: var(--clr-white);
+  border: 1.5px solid var(--clr-border);
+  border-radius: var(--radius-sm);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.10);
+  list-style: none;
+  margin: 0;
+  padding: 4px;
+  z-index: 300;
+  max-height: 240px;
+  overflow-y: auto;
+}
+
+.cselect-opt {
+  padding: 9px 12px;
+  font-size: 0.875rem;
+  border-radius: 6px;
+  cursor: pointer;
+  color: var(--clr-text);
+  transition: background 0.12s;
+  line-height: 1.4;
+}
+
+.cselect-opt:hover {
+  background: var(--clr-bg);
+}
+
+.cselect-opt--active {
+  background: #FFF7ED;
+  color: var(--clr-primary);
+  font-weight: 600;
+}
+
+/* ── CONTEXT: filtros da barra ─────────────────────── */
+.cselect.filter-select {
+  /* só sizing — visual fica no trigger */
+}
+
+.cselect.filter-select .cselect-trigger {
+  padding: 9px 12px;
+  font-size: 0.875rem;
+  white-space: nowrap;
+}
+
+/* filtro ativo (valor selecionado) */
+.cselect.filter-select.cselect--has-value .cselect-trigger {
+  border-color: var(--clr-primary);
+  color: var(--clr-primary);
+}
+
+/* ── CONTEXT: selects do formulário de produto/usuário */
+.cselect.admin-form-select .cselect-trigger {
+  padding: 11px 13px;
+  font-size: 0.95rem;
+  border: 1.5px solid var(--clr-border);
+  border-radius: var(--radius-sm);
+}
+
+/* ── CONTEXT: role select inline na lista de usuários  */
+.cselect.role-select {
+  display: inline-block;
+  min-width: 120px;
+}
+
+.cselect.role-select .cselect-trigger {
+  border-color: var(--clr-primary);
+  padding: 5px 10px;
+  font-size: 0.8rem;
+  font-weight: 600;
+}

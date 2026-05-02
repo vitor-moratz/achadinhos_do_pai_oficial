@@ -27,6 +27,14 @@ export default function Header() {
         </Link>
 
         <div className="header-social">
+          {TELEGRAM_URL && (
+            <a href={TELEGRAM_URL} target="_blank" rel="noopener noreferrer" className="header-social-icon" title="Telegram" aria-label="Telegram">
+              <TelegramIcon size={26} />
+            </a>
+          )}
+          <a href={INSTAGRAM_URL} target="_blank" rel="noopener noreferrer" className="header-social-icon" title="Instagram" aria-label="Instagram">
+            <InstagramIcon size={26} />
+          </a>
           <a href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer" className="header-cta">
             Entrar no Grupo
           </a>

@@ -15,20 +15,22 @@ const SEGMENTS = [
 export default function Sidebar() {
   return (
     <aside className="sidebar" aria-label="Segmentos">
-      <p className="sidebar-label">Segmentos</p>
-      <nav className="sidebar-nav">
-        {SEGMENTS.map((seg) => (
-          <NavLink
-            key={seg.to}
-            to={seg.to}
-            className={({ isActive }) =>
-              isActive ? 'sidebar-link active' : 'sidebar-link'
-            }
-          >
-            {seg.label}
-          </NavLink>
-        ))}
-      </nav>
+      <div className="sidebar-sticky">
+        <p className="sidebar-label">Segmentos</p>
+        <nav className="sidebar-nav">
+          {SEGMENTS.map((seg) => (
+            <NavLink
+              key={seg.to}
+              to={seg.to}
+              className={({ isActive }) =>
+                isActive ? 'sidebar-link active' : 'sidebar-link'
+              }
+            >
+              {seg.label}
+            </NavLink>
+          ))}
+        </nav>
+      </div>
     </aside>
   )
 }

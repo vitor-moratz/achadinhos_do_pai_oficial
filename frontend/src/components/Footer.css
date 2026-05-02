@@ -108,3 +108,14 @@
     text-align: center;
   }
 }
+
+.footer-dev-link {
+  color: #D1D5DB;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  transition: color 0.15s;
+}
+
+.footer-dev-link:hover {
+  color: #F97316;
+}

@@ -127,7 +127,7 @@ export default function HomePage() {
       <section className="section whatsapp-section">
         <div className="container">
           <div className="whatsapp-box">
-            <p className="wa-eyebrow">Não perde nenhum achado</p>
+            <p className="wa-eyebrow">Não perca nenhum achado</p>
             <h2>Entre na comunidade e não perca nenhum achado</h2>
             <p className="wa-sub">
               Comunidade exclusiva com promoções diárias, novidades e achadinhos antes de todo mundo.
