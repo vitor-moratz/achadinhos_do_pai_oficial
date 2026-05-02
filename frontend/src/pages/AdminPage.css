@@ -52,8 +52,9 @@
 }
 
 .admin-btn-ghost:hover {
-  border-color: var(--clr-text-muted);
-  color: var(--clr-text);
+  border-color: var(--clr-primary);
+  color: var(--clr-primary);
+  background: #FFF7ED;
 }
 
 .admin-btn-sm {
