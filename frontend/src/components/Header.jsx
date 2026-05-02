@@ -1,18 +1,19 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { NavLink } from 'react-router-dom'
-import { WHATSAPP_URL } from '../constants'
+import { WHATSAPP_URL, TELEGRAM_URL, INSTAGRAM_URL } from '../constants'
+import { TelegramIcon, InstagramIcon } from './SocialIcons'
 import './Header.css'
 
 const SEGMENTS = [
-  { to: '/segmento/ferramentas', icon: '🔧', label: 'Ferramentas' },
   { to: '/segmento/automotivo',  icon: '🚗', label: 'Automotivo' },
-  { to: '/segmento/pet-shop',    icon: '🐾', label: 'Pet Shop' },
   { to: '/segmento/casa',        icon: '🏠', label: 'Casa' },
   { to: '/segmento/eletronicos', icon: '⚡', label: 'Eletrônicos' },
   { to: '/segmento/esporte',     icon: '💪', label: 'Esporte' },
+  { to: '/segmento/ferramentas', icon: '🔧', label: 'Ferramentas' },
   { to: '/segmento/games',       icon: '🎮', label: 'Games' },
   { to: '/segmento/moda',        icon: '👔', label: 'Moda' },
+  { to: '/segmento/pet-shop',    icon: '🐾', label: 'Pet Shop' },
 ]
 
 export default function Header() {
@@ -26,14 +27,24 @@ export default function Header() {
           <span className="logo-text">Achadinhos do Pai</span>
         </Link>
 
-        <a
-          href={WHATSAPP_URL}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="header-cta"
-        >
-          💬 Entrar no Grupo
-        </a>
+        <div className="header-social">
+          {TELEGRAM_URL && (
+            <a href={TELEGRAM_URL} target="_blank" rel="noopener noreferrer" className="header-social-icon" title="Telegram" aria-label="Telegram">
+              <TelegramIcon size={20} />
+            </a>
+          )}
+          <a href={INSTAGRAM_URL} target="_blank" rel="noopener noreferrer" className="header-social-icon" title="Instagram" aria-label="Instagram">
+            <InstagramIcon size={20} />
+          </a>
+          <a
+            href={WHATSAPP_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="header-cta"
+          >
+            Entrar no Grupo
+          </a>
+        </div>
 
         <button
           className="hamburger"
@@ -56,7 +67,7 @@ export default function Header() {
               }
               onClick={() => setMenuOpen(false)}
             >
-              {seg.icon} {seg.label}
+              {seg.label}
             </NavLink>
           ))}
           <a
@@ -66,7 +77,7 @@ export default function Header() {
             className="header-cta mobile-cta"
             onClick={() => setMenuOpen(false)}
           >
-            💬 Entrar no Grupo
+            Entrar no Grupo
           </a>
         </div>
       )}

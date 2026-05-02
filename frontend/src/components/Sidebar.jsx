@@ -2,14 +2,14 @@ import { NavLink } from 'react-router-dom'
 import './Sidebar.css'
 
 const SEGMENTS = [
-  { to: '/segmento/ferramentas', icon: '🔧', label: 'Ferramentas' },
   { to: '/segmento/automotivo',  icon: '🚗', label: 'Automotivo' },
-  { to: '/segmento/pet-shop',    icon: '🐾', label: 'Pet Shop' },
   { to: '/segmento/casa',        icon: '🏠', label: 'Casa' },
   { to: '/segmento/eletronicos', icon: '⚡', label: 'Eletrônicos' },
   { to: '/segmento/esporte',     icon: '💪', label: 'Esporte' },
+  { to: '/segmento/ferramentas', icon: '🔧', label: 'Ferramentas' },
   { to: '/segmento/games',       icon: '🎮', label: 'Games' },
   { to: '/segmento/moda',        icon: '👔', label: 'Moda' },
+  { to: '/segmento/pet-shop',    icon: '🐾', label: 'Pet Shop' },
 ]
 
 export default function Sidebar() {
@@ -25,8 +25,7 @@ export default function Sidebar() {
               isActive ? 'sidebar-link active' : 'sidebar-link'
             }
           >
-            <span className="sidebar-icon">{seg.icon}</span>
-            <span className="sidebar-text">{seg.label}</span>
+            {seg.label}
           </NavLink>
         ))}
       </nav>

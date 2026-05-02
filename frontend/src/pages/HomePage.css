@@ -331,7 +331,7 @@
 
 /* ── WHATSAPP ───────────────────────────────────────────── */
 .whatsapp-section {
-  background: #0F172A;
+  background: linear-gradient(135deg, #EA580C 0%, #F97316 60%, #FB923C 100%);
   padding: 80px 0;
 }
 
@@ -345,9 +345,11 @@
 .wa-eyebrow {
   font-size: 0.875rem;
   font-weight: 600;
-  color: #86EFAC;
+  color: rgba(255, 255, 255, 0.8);
   margin-bottom: 12px;
   display: block;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
 }
 
 .whatsapp-box h2 {
@@ -358,7 +360,7 @@
 }
 
 .wa-sub {
-  color: #94A3B8;
+  color: rgba(255, 255, 255, 0.8);
   font-size: 0.95rem;
   line-height: 1.7;
   margin-bottom: 28px;
@@ -371,6 +373,28 @@
   flex-wrap: wrap;
 }
 
+.wa-cta-buttons .btn-outline {
+  color: #fff;
+  border-color: rgba(255, 255, 255, 0.5);
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.wa-cta-buttons .btn-outline:hover {
+  color: var(--clr-primary);
+  border-color: #fff;
+  background: #fff;
+}
+
+.wa-cta-buttons .btn-primary {
+  background: #fff;
+  color: var(--clr-primary-dark);
+  border-color: #fff;
+}
+
+.wa-cta-buttons .btn-primary:hover {
+  background: #FFF7ED;
+  border-color: #FFF7ED;
+}
 /* ── RESPONSIVE ─────────────────────────────────────────── */
 @media (max-width: 900px) {
   .categories-grid {

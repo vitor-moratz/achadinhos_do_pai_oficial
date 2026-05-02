@@ -112,16 +112,25 @@ export default function AdminPage() {
     setFetchedUrl(null)
     try {
       const data = await fetchShopeeProduct(shopeeUrl.trim())
+      const cleanUrl = data.final_url || shopeeUrl.trim()
       setForm((prev) => ({
         ...prev,
         title: data.title || prev.title,
         description: data.description || prev.description,
         image_url: data.image_url || prev.image_url,
         promo_price: data.promo_price?.toString() || prev.promo_price,
-        affiliate_link: shopeeUrl.trim(),
+        affiliate_link: cleanUrl,
+        segment: data.segment || prev.segment,
+        category: data.category || prev.category,
       }))
       if (data.final_url) setFetchedUrl(data.final_url)
-      setStatus({ type: 'success', msg: '✅ Dados importados! Revise e complete as informações.' })
+
+      const hasProductData = data.title || data.image_url || data.promo_price
+      if (hasProductData) {
+        setStatus({ type: 'success', msg: '✅ Dados importados! Revise e complete as informações.' })
+      } else {
+        setStatus({ type: 'warn', msg: '🔗 URL resolvida! Shopee não permite acesso automático — preencha título, preço e imagem manualmente.' })
+      }
     } catch {
       setStatus({ type: 'warn', msg: '⚠️ Importação automática não disponível. Preencha manualmente.' })
     } finally {

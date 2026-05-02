@@ -11,18 +11,15 @@ from bs4 import BeautifulSoup
 shopee_bp = Blueprint("shopee", __name__, url_prefix="/api/shopee")
 
 # ── Shopee Open Platform credentials (opcional) ─────────────
-# Preencha .env com SHOPEE_PARTNER_ID e SHOPEE_PARTNER_KEY
-# para ativar a busca via API oficial (mais confiável).
-# Sem as credenciais, o sistema usa scraping como fallback.
 _PARTNER_ID  = os.getenv("SHOPEE_PARTNER_ID", "").strip()
 _PARTNER_KEY = os.getenv("SHOPEE_PARTNER_KEY", "").strip()
 _OPEN_API_BASE = "https://partner.shopeemobile.com"
 
 _HEADERS = {
     "User-Agent": (
-        "Mozilla/5.0 (Linux; Android 11; Pixel 5) "
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
         "AppleWebKit/537.36 (KHTML, like Gecko) "
-        "Chrome/124.0.6367.82 Mobile Safari/537.36"
+        "Chrome/124.0.0.0 Safari/537.36"
     ),
     "Accept-Language": "pt-BR,pt;q=0.9",
     "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
@@ -30,6 +27,218 @@ _HEADERS = {
     "Referer": "https://shopee.com.br/",
     "Cache-Control": "no-cache",
 }
+
+_API_HEADERS = {}  # não utilizado — mantido para compatibilidade
+
+# ── Mapeamento Shopee categorias → nosso sistema ────────────
+
+_SEGMENT_KEYWORDS = {
+    "pet-shop":   ["animais domésticos", "pet", "cachorro", "gato", "aquário",
+                   "pássaro", "ração", "petisco"],
+    "ferramentas":["ferramentas", "construção", "fixadores", "solda", "medição",
+                   "chave", "furadeira", "parafuso", "oficina"],
+    "automotivo": ["automotivo", "automóveis", "veículos", "moto", "carro",
+                   "pneu", "óleo"],
+    "casa":       ["casa", "lar", "cozinha", "organização doméstica", "decoração",
+                   "jardim", "limpeza doméstica", "móveis", "iluminação",
+                   "utilidades domésticas"],
+    "eletronicos":["eletrônicos", "computadores", "celulares", "smartphones",
+                   "tablets", "câmeras", "áudio e vídeo", "tv", "wearables",
+                   "acessórios para celular"],
+    "esporte":    ["esportes", "lazer", "fitness", "academia", "camping",
+                   "pesca", "ciclismo", "futebol", "corrida"],
+    "games":      ["games", "videogame", "console", "drone", "impressão 3d",
+                   "hobbies", "colecionáveis"],
+    "moda":       ["moda", "roupas", "calçados", "tênis", "sapatos", "relógios",
+                   "óculos", "bolsas", "acessórios de moda"],
+}
+
+_CATEGORY_KEYWORDS = {
+    "pet-shop": {
+        "Comida":          ["ração", "alimento", "comida", "seca", "úmida"],
+        "Petiscos":        ["petisco", "snack", "bifinho", "osso"],
+        "Brinquedos":      ["brinquedo", "mordedor", "bolinha", "arranhador"],
+        "Higiene":         ["higiene", "banho", "tosa", "shampoo", "escova",
+                            "dental", "tapete higiênico"],
+        "Cama e Descanso": ["cama", "descanso", "canil", "manta", "almofada"],
+        "Transporte":      ["transporte", "caixa de transporte", "bolsa", "mochila"],
+    },
+    "ferramentas": {
+        "Manuais":       ["chave", "alicate", "martelo", "manual", "serrote"],
+        "Elétricas":     ["furadeira", "parafusadeira", "elétrica", "lixadeira",
+                          "esmerilhadeira"],
+        "Medição":       ["trena", "nível", "medição", "paquímetro", "régua"],
+        "Fixadores":     ["parafuso", "prego", "bucha", "fixador", "rebite"],
+        "Organização":   ["caixa", "organizador", "estojo", "bancada"],
+        "Corte e Solda": ["serra", "solda", "corte", "disco", "estilete"],
+    },
+    "automotivo": {
+        "Limpeza":     ["limpeza", "lavagem", "polimento", "cera"],
+        "Acessórios":  ["acessório", "suporte", "tapete", "capa"],
+        "Eletrônicos": ["gps", "câmera", "sensor", "eletrônico"],
+        "Iluminação":  ["lâmpada", "led", "farol", "iluminação"],
+        "Som":         ["som", "auto falante", "rádio", "amplificador"],
+        "Manutenção":  ["óleo", "filtro", "correia", "manutenção"],
+    },
+    "casa": {
+        "Cozinha":     ["cozinha", "panela", "frigideira", "utensílio"],
+        "Churrasco":   ["churrasco", "grelha", "churrasqueira", "espeto"],
+        "Organização": ["organização", "caixa", "prateleira", "armário"],
+        "Limpeza":     ["limpeza", "vassoura", "rodo", "pano"],
+        "Jardim":      ["jardim", "planta", "vaso", "regador"],
+        "Iluminação":  ["lâmpada", "luminária", "iluminação"],
+        "Decoração":   ["decoração", "quadro", "enfeite", "almofada"],
+    },
+    "eletronicos": {
+        "Smartphones":          ["celular", "smartphone", "iphone", "android"],
+        "Áudio":                ["fone", "caixa de som", "headphone", "áudio"],
+        "Computadores":         ["notebook", "computador", "monitor", "teclado"],
+        "Câmeras":              ["câmera", "fotografia", "lente", "tripé"],
+        "Cabos e Carregadores": ["cabo", "carregador", "adaptador", "hub"],
+        "Smart Home":           ["smart home", "alexa", "automação", "lâmpada inteligente"],
+    },
+    "esporte": {
+        "Fitness":  ["fitness", "academia", "haltere", "musculação"],
+        "Camping":  ["camping", "barraca", "mochila", "lanterna"],
+        "Pesca":    ["pesca", "anzol", "vara", "isca"],
+        "Ciclismo": ["bicicleta", "ciclismo", "capacete"],
+        "Futebol":  ["futebol", "chuteira", "bola"],
+    },
+    "games": {
+        "Controles":    ["controle", "joystick", "gamepad"],
+        "Impressão 3D": ["impressão 3d", "filamento", "impressora 3d"],
+        "Drones":       ["drone", "fpv", "helicóptero"],
+        "Board Games":  ["board game", "jogo de tabuleiro", "card game"],
+    },
+    "moda": {
+        "Camisetas": ["camiseta", "camisa", "polo", "blusa"],
+        "Calçados":  ["tênis", "sapato", "sandália", "chinelo"],
+        "Relógios":  ["relógio", "smartwatch"],
+        "Óculos":    ["óculos", "lente"],
+    },
+}
+
+
+# ── Mapeamento categorias Shopee → nosso sistema ─────────────
+
+def _map_to_segment_category(shopee_categories: list) -> tuple[str | None, str | None]:
+    """
+    Recebe lista de strings ou dicts (breadcrumb da Shopee).
+    Retorna (segment_slug, category_name) do nosso sistema.
+    """
+    # Normaliza para lista de strings
+    names = []
+    for c in shopee_categories:
+        if isinstance(c, str):
+            names.append(c)
+        elif isinstance(c, dict):
+            names.append(c.get("display_name") or c.get("name") or "")
+    cat_text = " ".join(names).lower()
+
+    # Detecta segmento
+    segment = None
+    for seg_slug, keywords in _SEGMENT_KEYWORDS.items():
+        if any(kw in cat_text for kw in keywords):
+            segment = seg_slug
+            break
+
+    # Detecta categoria dentro do segmento
+    category = None
+    if segment and segment in _CATEGORY_KEYWORDS:
+        for cat_name, keywords in _CATEGORY_KEYWORDS[segment].items():
+            if any(kw in cat_text for kw in keywords):
+                category = cat_name
+                break
+
+    return segment, category
+
+
+# ── Scraping SSR via facebookexternalhit ─────────────────────
+
+_UA_BOT = (
+    "facebookexternalhit/1.1 "
+    "(+http://www.facebook.com/externalhit_uatext.php)"
+)
+
+def _fetch_via_ssr(
+    session: requests.Session, shop_id: int, item_id: int
+) -> dict | None:
+    """
+    Busca dados do produto usando User-Agent facebookexternalhit.
+    A Shopee serve SSR (og: meta + JSON-LD breadcrumb) para bots sociais.
+    Funciona com a URL canônica /product/{shop_id}/{item_id}.
+    """
+    try:
+        url = f"https://shopee.com.br/product/{shop_id}/{item_id}"
+        resp = session.get(url, headers={
+            "User-Agent": _UA_BOT,
+            "Accept": "text/html,*/*",
+            "Accept-Language": "pt-BR,pt;q=0.9",
+        }, timeout=15, allow_redirects=True)
+
+        if resp.status_code != 200:
+            return None
+
+        soup = BeautifulSoup(resp.text, "lxml")
+
+        def og(prop):
+            tag = soup.find("meta", property=f"og:{prop}")
+            return tag.get("content", "").strip() if tag else None
+
+        title       = og("title")
+        image_url   = og("image")
+        description = og("description")
+
+        # Limpa sufixo "| Shopee Brasil" do título
+        if title:
+            title = re.sub(r'\s*\|\s*Shopee.*$', '', title).strip()
+
+        # Imagem: og:image retorna banner promocional (promo-dim-).
+        # Prefere a primeira URL br-XXXXXXX do HTML (imagem real do produto).
+        real_imgs = re.findall(
+            r'https://[a-z.-]*susercontent\.com/file/(br-[a-zA-Z0-9._-]+)',
+            resp.text,
+        )
+        if real_imgs:
+            # Prefere .webp se disponível
+            webp = next((f for f in real_imgs if f.endswith(".webp")), None)
+            best = webp or real_imgs[0]
+            image_url = f"https://down-br.img.susercontent.com/file/{best}"
+
+        # Preço: o SSR (facebookexternalhit) não inclui preço real — o bloco
+        # de preço (section aria-live="polite") só é renderizado pelo React
+        # no browser. Deixa nulo para o usuário preencher manualmente.
+        price_brl = None
+
+        # Categorias via BreadcrumbList JSON-LD
+        breadcrumb_names = []
+        for script in soup.find_all("script", type="application/ld+json"):
+            try:
+                data = json.loads(script.string or "")
+                if data.get("@type") == "BreadcrumbList":
+                    for item in data.get("itemListElement", []):
+                        name = item.get("item", {}).get("name") or item.get("name")
+                        if name and name.lower() != "shopee":
+                            breadcrumb_names.append(name)
+                    break
+            except Exception:
+                continue
+
+        segment, category = _map_to_segment_category(breadcrumb_names)
+
+        if not title and not image_url:
+            return None
+
+        return {
+            "title":       title,
+            "image_url":   image_url,
+            "description": description,
+            "promo_price": price_brl,
+            "segment":     segment,
+            "category":    category,
+        }
+    except Exception:
+        return None
 
 
 # ── Shopee Open API helpers ──────────────────────────────────
@@ -107,11 +316,23 @@ def _fetch_via_open_api(shop_id: int, item_id: int) -> dict | None:
 def _resolve_short_url(session: requests.Session, url: str) -> str:
     """
     Resolve link afiliado curto (s.shopee.com.br) para URL real do produto.
-    Extrai httpUrl do objeto CONFIG embutido no JavaScript da página.
+    Primeiro tenta o HTTP redirect (301/302); como fallback, extrai httpUrl do CONFIG JS.
     Retorna a URL base do produto (sem query params de rastreamento).
     """
     try:
+        # Passo 1: tenta sem follow redirects (pega Location do 301)
+        resp = session.get(url, headers=_HEADERS, timeout=10, allow_redirects=False)
+        if resp.is_redirect:
+            location = resp.headers.get("Location", "")
+            if "shopee.com.br" in location:
+                return location.split("?")[0]
+
+        # Passo 2: segue redirects e usa a URL final
         resp = session.get(url, headers=_HEADERS, timeout=10, allow_redirects=True)
+        if "shopee.com.br" in resp.url:
+            return resp.url.split("?")[0]
+
+        # Passo 3: fallback antigo — extrai httpUrl do CONFIG JS (links mais antigos)
         m = re.search(
             r'httpUrl\s*:\s*"(https:\\\/\\\/shopee\.com\.br\\\/[^"]+)"',
             resp.text,
@@ -160,18 +381,28 @@ def fetch_product():
         if "s.shopee.com.br" in url:
             product_url = _resolve_short_url(session, url)
 
-        # ── Passo 2: tenta API oficial (se credenciais existem) ─
         shop_id, item_id = _extract_ids_from_url(product_url)
+
+        # ── Passo 2: SSR via facebookexternalhit (sempre disponível) ──
+        if shop_id and item_id:
+            result = _fetch_via_ssr(session, shop_id, item_id)
+            if result and result.get("title"):
+                result["final_url"] = product_url
+                return jsonify(result)
+
+        # ── Passo 3: Open Platform API (se credenciais existem) ─
         if shop_id and item_id:
             api_result = _fetch_via_open_api(shop_id, item_id)
             if api_result and api_result.get("title"):
                 api_result["final_url"] = product_url
+                api_result.setdefault("segment", None)
+                api_result.setdefault("category", None)
                 return jsonify(api_result)
 
-        # ── Passo 3: fallback — scraping da página ────────────
-        resp       = session.get(product_url, headers=_HEADERS, timeout=15, allow_redirects=True)
-        final_url  = resp.url
-        soup       = BeautifulSoup(resp.text, "lxml")
+        # ── Passo 4: fallback — scraping da página ────────────
+        resp      = session.get(product_url, headers=_HEADERS, timeout=15, allow_redirects=True)
+        final_url = resp.url
+        soup      = BeautifulSoup(resp.text, "lxml")
 
         def og(prop):
             tag = (soup.find("meta", property=f"og:{prop}") or
@@ -195,11 +426,13 @@ def fetch_product():
                 items = data if isinstance(data, list) else [data]
                 for item in items:
                     if item.get("@type") in ("Product", "product"):
-                        if not title:       title       = item.get("name")
+                        if not title:
+                            title = item.get("name")
                         if not image:
                             imgs  = item.get("image")
                             image = imgs[0] if isinstance(imgs, list) else imgs
-                        if not description: description = item.get("description")
+                        if not description:
+                            description = item.get("description")
                         offers = item.get("offers") or item.get("Offers")
                         if offers and not price:
                             o     = offers[0] if isinstance(offers, list) else offers
@@ -229,6 +462,8 @@ def fetch_product():
             "description": description,
             "promo_price": price or None,
             "final_url":   final_url,
+            "segment":     None,
+            "category":    None,
         })
 
     except requests.exceptions.Timeout:

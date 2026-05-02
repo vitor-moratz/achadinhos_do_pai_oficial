@@ -1,5 +1,5 @@
 .site-footer {
-  background: #111827;
+  background: #1C0D04;
   color: #D1D5DB;
 }
 
@@ -35,6 +35,7 @@
   object-fit: contain;
   border-radius: 8px;
   flex-shrink: 0;
+  filter: drop-shadow(0 2px 8px rgba(249,115,22,0.4));
 }
 
 .footer-brand p {
@@ -54,14 +55,22 @@
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.8px;
-  color: #9CA3AF;
+  color: #FB923C;
   margin-bottom: 4px;
 }
 
-.footer-links a {
+.footer-links a,
+.footer-links a:visited {
   font-size: 0.875rem;
   color: #D1D5DB;
+  text-decoration: none;
   transition: color 0.15s;
+}
+
+.footer-social-link {
+  display: flex;
+  align-items: center;
+  gap: 7px;
 }
 
 .footer-links a:hover {
@@ -69,7 +78,7 @@
 }
 
 .footer-bottom {
-  border-top: 1px solid #1F2937;
+  border-top: 1px solid rgba(249, 115, 22, 0.2);
   max-width: var(--max-width);
   margin: 0 auto;
   padding: 20px;

@@ -42,10 +42,31 @@
   line-height: 1.2;
 }
 
-/* CTA */
-.header-cta {
-  flex-shrink: 0;
+/* CTA + ícones sociais */
+.header-social {
+  display: flex;
+  align-items: center;
+  gap: 6px;
   margin-left: auto;
+  flex-shrink: 0;
+}
+
+.header-social-icon {
+  font-size: 1.2rem;
+  text-decoration: none;
+  padding: 4px 6px;
+  border-radius: var(--radius-sm);
+  transition: background 0.2s, color 0.2s;
+  line-height: 1;
+  color: var(--clr-primary);
+}
+
+.header-social-icon:hover {
+  background: #FFF7ED;
+  color: var(--clr-primary-dark);
+}
+
+.header-cta {
   background: var(--clr-primary);
   color: var(--clr-white);
   padding: 8px 18px;

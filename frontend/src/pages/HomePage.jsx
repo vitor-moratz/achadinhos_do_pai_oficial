@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { getProducts, getSegments } from '../services/api'
-import { WHATSAPP_URL, TELEGRAM_URL } from '../constants'
+import { WHATSAPP_URL, TELEGRAM_URL, INSTAGRAM_URL } from '../constants'
+import { WhatsAppIcon, TelegramIcon, InstagramIcon } from '../components/SocialIcons'
 import ProductCard from '../components/ProductCard'
 import './HomePage.css'
 
@@ -38,19 +39,19 @@ export default function HomePage() {
               <strong>só o que vale o seu dinheiro de verdade.</strong>
             </p>
             <div className="hero-proof">
-              <span>✅ Só produto que vale a pena</span>
-              <span>💰 Melhor preço da Shopee</span>
-              <span>🔄 Novos achados toda semana</span>
+              <span>Só produto que vale a pena</span>
+              <span>Melhor preço da Shopee</span>
+              <span>Novos achados toda semana</span>
             </div>
             <div className="hero-actions">
-              <Link to="/segmento/ferramentas" className="btn btn-primary">🔍 Ver Achadinhos</Link>
+              <Link to="/segmento/ferramentas" className="btn btn-primary">Ver Achadinhos</Link>
               <a
                 href={WHATSAPP_URL}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="btn btn-outline"
               >
-                💬 Entrar no WhatsApp
+                Entrar no WhatsApp
               </a>
             </div>
           </div>
@@ -126,10 +127,10 @@ export default function HomePage() {
       <section className="section whatsapp-section">
         <div className="container">
           <div className="whatsapp-box">
-            <p className="wa-eyebrow">📲 Não perde nenhum achado</p>
-            <h2>Receba as melhores ofertas direto no WhatsApp</h2>
+            <p className="wa-eyebrow">Não perde nenhum achado</p>
+            <h2>Entre na comunidade e não perca nenhum achado</h2>
             <p className="wa-sub">
-              Grupo exclusivo com promoções diárias, novidades e achadinhos antes de todo mundo.
+              Comunidade exclusiva com promoções diárias, novidades e achadinhos antes de todo mundo.
               Gratuito, sem spam.
             </p>
             <div className="wa-cta-buttons">
@@ -139,7 +140,7 @@ export default function HomePage() {
                 rel="noopener noreferrer"
                 className="btn btn-primary btn-lg"
               >
-                💬 Entrar no Grupo WhatsApp
+                <WhatsAppIcon size={20} /> Grupo WhatsApp
               </a>
               {TELEGRAM_URL && (
                 <a
@@ -148,9 +149,17 @@ export default function HomePage() {
                   rel="noopener noreferrer"
                   className="btn btn-outline btn-lg"
                 >
-                  ✈️ Canal no Telegram
+                  <TelegramIcon size={20} /> Canal no Telegram
                 </a>
               )}
+              <a
+                href={INSTAGRAM_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="btn btn-outline btn-lg"
+              >
+                <InstagramIcon size={20} /> Instagram
+              </a>
             </div>
           </div>
         </div>
