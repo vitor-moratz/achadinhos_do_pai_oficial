@@ -10,6 +10,7 @@ import CategoryPage from './pages/CategoryPage'
 import SegmentPage from './pages/SegmentPage'
 import AdminPage from './pages/AdminPage'
 import LoginPage from './pages/LoginPage'
+import NotFoundPage from './pages/NotFoundPage'
 import './App.css'
 
 function ProtectedRoute({ children }) {
@@ -33,6 +34,17 @@ function PublicLayout({ children }) {
   )
 }
 
+function AdminLayout({ children }) {
+  return (
+    <div className="app-wrapper">
+      <Header simple />
+      <main style={{ flex: 1 }}>{children}</main>
+      <Footer />
+      <ScrollToTopButton />
+    </div>
+  )
+}
+
 export default function App() {
   return (
     <BrowserRouter>
@@ -40,7 +52,9 @@ export default function App() {
         <Routes>
           <Route path="/login" element={<LoginPage />} />
           <Route path="/admin" element={
-            <ProtectedRoute><AdminPage /></ProtectedRoute>
+            <ProtectedRoute>
+              <AdminLayout><AdminPage /></AdminLayout>
+            </ProtectedRoute>
           } />
           <Route path="/*" element={
             <PublicLayout>
@@ -49,6 +63,7 @@ export default function App() {
                 <Route path="/produto/:id" element={<ProductPage />} />
                 <Route path="/segmento/:slug" element={<SegmentPage />} />
                 <Route path="/categoria/:slug" element={<CategoryPage />} />
+                <Route path="*" element={<NotFoundPage />} />
               </Routes>
             </PublicLayout>
           } />

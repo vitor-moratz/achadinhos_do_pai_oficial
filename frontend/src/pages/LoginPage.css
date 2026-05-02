@@ -70,6 +70,20 @@
   border-color: var(--clr-primary);
 }
 
+.login-back {
+  display: inline-block;
+  margin-top: 20px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--clr-text-muted);
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.login-back:hover {
+  color: var(--clr-primary);
+}
+
 .login-error {
   background: #FEF2F2;
   color: #DC2626;

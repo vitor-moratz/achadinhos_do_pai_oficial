@@ -15,7 +15,7 @@ const SEGMENTS = [
   { to: '/segmento/pet-shop',    label: 'Pet Shop' },
 ]
 
-export default function Header() {
+export default function Header({ simple = false }) {
   const [menuOpen, setMenuOpen] = useState(false)
 
   return (
@@ -26,31 +26,35 @@ export default function Header() {
           <span className="logo-text">Achadinhos do Pai</span>
         </Link>
 
-        <div className="header-social">
-          {TELEGRAM_URL && (
-            <a href={TELEGRAM_URL} target="_blank" rel="noopener noreferrer" className="header-social-icon" title="Telegram" aria-label="Telegram">
-              <TelegramIcon size={26} />
+        {!simple && (
+          <div className="header-social">
+            {TELEGRAM_URL && (
+              <a href={TELEGRAM_URL} target="_blank" rel="noopener noreferrer" className="header-social-icon" title="Telegram" aria-label="Telegram">
+                <TelegramIcon size={26} />
+              </a>
+            )}
+            <a href={INSTAGRAM_URL} target="_blank" rel="noopener noreferrer" className="header-social-icon" title="Instagram" aria-label="Instagram">
+              <InstagramIcon size={26} />
             </a>
-          )}
-          <a href={INSTAGRAM_URL} target="_blank" rel="noopener noreferrer" className="header-social-icon" title="Instagram" aria-label="Instagram">
-            <InstagramIcon size={26} />
-          </a>
-          <a href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer" className="header-cta">
-            Entrar no Grupo
-          </a>
-        </div>
+            <a href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer" className="header-cta">
+              Entrar no Grupo
+            </a>
+          </div>
+        )}
 
-        <button
-          className="hamburger"
-          onClick={() => setMenuOpen((o) => !o)}
-          aria-label={menuOpen ? 'Fechar menu' : 'Abrir menu'}
-          aria-expanded={menuOpen}
-        >
-          <span /><span /><span />
-        </button>
+        {!simple && (
+          <button
+            className="hamburger"
+            onClick={() => setMenuOpen((o) => !o)}
+            aria-label={menuOpen ? 'Fechar menu' : 'Abrir menu'}
+            aria-expanded={menuOpen}
+          >
+            <span /><span /><span />
+          </button>
+        )}
       </div>
 
-      {menuOpen && (
+      {!simple && menuOpen && (
         <nav className="mobile-nav">
           <p className="mobile-nav-section-label">Segmentos</p>
           <div className="mobile-nav-links">

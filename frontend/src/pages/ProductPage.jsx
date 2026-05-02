@@ -32,10 +32,7 @@ export default function ProductPage() {
     </div>
   )
 
-  const discount =
-    product.original_price && product.promo_price
-      ? Math.round(((product.original_price - product.promo_price) / product.original_price) * 100)
-      : null
+  const discount = null  // modelo de desconto removido
 
   return (
     <div className="pp-wrapper">
@@ -65,12 +62,12 @@ export default function ProductPage() {
             )}
 
             <div className="pp-prices">
-              {product.original_price && (
-                <span className="pp-original">R$ {product.original_price.toFixed(2)}</span>
+              <span className="pp-promo">R$ {Number(product.price_from).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+              {product.price_to && (
+                <span className="pp-price-sep">–</span>
               )}
-              <span className="pp-promo">R$ {product.promo_price.toFixed(2)}</span>
-              {discount && (
-                <span className="pp-discount">-{discount}%</span>
+              {product.price_to && (
+                <span className="pp-promo">R$ {Number(product.price_to).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
               )}
             </div>
 

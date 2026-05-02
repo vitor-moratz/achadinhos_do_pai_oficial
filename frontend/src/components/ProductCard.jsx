@@ -3,13 +3,6 @@ import { registerClick } from '../services/api'
 import './ProductCard.css'
 
 export default function ProductCard({ product }) {
-  const discount =
-    product.original_price && product.promo_price
-      ? Math.round(
-          ((product.original_price - product.promo_price) / product.original_price) * 100
-        )
-      : null
-
   // Usa tag_label vindo da API, ou formata o slug como fallback
   const tagLabel = product.tag_label
     ?? (product.tag ? product.tag.replace(/_/g, ' ') : null)
@@ -28,7 +21,6 @@ export default function ProductCard({ product }) {
     <article className="product-card">
       <div className="card-badges">
         {tagLabel && <span className="badge badge-tag">{tagLabel}</span>}
-        {discount && <span className="badge badge-discount">-{discount}%</span>}
       </div>
 
       <Link to={`/produto/${product.id}`} className="card-image-link">
@@ -46,11 +38,22 @@ export default function ProductCard({ product }) {
           {product.title}
         </Link>
 
+        {(product.segment_name || product.category) && (
+          <div className="card-meta">
+            {product.segment_name && (
+              <span className="card-meta-item card-meta-segment">{product.segment_name}</span>
+            )}
+            {product.category && (
+              <span className="card-meta-item card-meta-category">{product.category}</span>
+            )}
+          </div>
+        )}
+
         <div className="card-prices">
-          {product.original_price && (
-            <span className="price-original">R$ {product.original_price.toFixed(2)}</span>
-          )}
-          <span className="price-promo">R$ {product.promo_price.toFixed(2)}</span>
+          <span className="price-promo">
+            R$ {Number(product.price_from).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            {product.price_to && ` – R$ ${Number(product.price_to).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
+          </span>
         </div>
 
         <button className="btn-shopee" onClick={handleBuy}>

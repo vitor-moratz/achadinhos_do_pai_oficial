@@ -35,10 +35,12 @@
 }
 
 .logo-text {
-  font-size: 1.2rem;
+  font-size: 1.35rem;
   font-weight: 800;
   color: var(--clr-text);
   line-height: 1.2;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
 }
 
 /* ── CTA ────────────────────────────────────── */
@@ -209,7 +211,12 @@
     display: flex;
   }
 
+  .logo-img {
+    width: 72px;
+    height: 72px;
+  }
+
   .logo-text {
-    font-size: 1rem;
+    font-size: 1.05rem;
   }
 }

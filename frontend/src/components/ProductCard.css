@@ -96,7 +96,7 @@
   line-height: 1.4;
   color: var(--clr-text);
   display: -webkit-box;
-  -webkit-line-clamp: 2;
+  -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
@@ -105,24 +105,48 @@
   color: var(--clr-primary);
 }
 
-/* PRICES */
-.card-prices {
+/* SEGMENT / CATEGORY META */
+.card-meta {
   display: flex;
-  align-items: baseline;
-  gap: 8px;
   flex-wrap: wrap;
+  gap: 5px;
 }
 
-.price-original {
-  font-size: 0.78rem;
-  color: var(--clr-text-muted);
-  text-decoration: line-through;
+.card-meta-item {
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 20px;
+  line-height: 1.5;
+}
+
+.card-meta-segment {
+  background: #F0FDF4;
+  color: #15803D;
+  border: 1px solid #BBF7D0;
+}
+
+.card-meta-category {
+  background: #EFF6FF;
+  color: #1D4ED8;
+  border: 1px solid #BFDBFE;
+}
+
+/* PRICES */
+.card-prices {
+  display: block;
 }
 
 .price-promo {
   font-size: 1.1rem;
   font-weight: 800;
   color: var(--clr-primary-dark);
+}
+
+.price-range-sep {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--clr-text-muted);
 }
 
 /* CTA */

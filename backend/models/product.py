@@ -4,29 +4,32 @@ from datetime import datetime, timezone
 def make_product(data: dict, now=None) -> dict:
     now = now or datetime.now(timezone.utc)
     return {
-        "title":          data["title"],
-        "description":    data.get("description"),
-        "original_price": data.get("original_price"),
-        "promo_price":    data["promo_price"],
-        "image_url":      data.get("image_url"),
+        "title":       data["title"],
+        "description": data.get("description"),
+        "price_from":  data["price_from"],
+        "price_to":    data.get("price_to"),
+        "image_url":   data.get("image_url"),
         "affiliate_link": data["affiliate_link"],
-        "category":       data.get("category"),
-        "segment":        data.get("segment"),
-        "tag":            data.get("tag"),
-        "is_active":      True,
-        "clicks":         0,
-        "created_at":     now,
-        "updated_at":     now,
+        "category":    data.get("category"),
+        "segment":     data.get("segment"),
+        "tag":         data.get("tag"),
+        "is_active":   True,
+        "clicks":      0,
+        "created_at":  now,
+        "updated_at":  now,
     }
 
 
 def product_to_dict(doc: dict) -> dict:
+    # backward compat: produtos antigos usavam promo_price
+    price_from = doc.get("price_from") or doc.get("promo_price")
+    price_to   = doc.get("price_to")
     return {
         "id":             str(doc["_id"]),
         "title":          doc.get("title"),
         "description":    doc.get("description"),
-        "original_price": doc.get("original_price"),
-        "promo_price":    doc.get("promo_price"),
+        "price_from":     price_from,
+        "price_to":       price_to,
         "image_url":      doc.get("image_url"),
         "affiliate_link": doc.get("affiliate_link"),
         "category":       doc.get("category"),

@@ -5,6 +5,7 @@ from datetime import datetime, timezone
 
 from database import get_db
 from models.product  import make_product, product_to_dict
+from notifications   import notify_new_product
 
 products_bp = Blueprint("products", __name__, url_prefix="/api/products")
 
@@ -66,10 +67,16 @@ def list_products():
     if tag_slugs:
         tag_map = {t["slug"]: t["label"] for t in db.tags.find({"slug": {"$in": list(tag_slugs)}})}
 
+    seg_slugs = {p["segment"] for p in products if p.get("segment")}
+    seg_map   = {}
+    if seg_slugs:
+        seg_map = {s["slug"]: s["name"] for s in db.segments.find({"slug": {"$in": list(seg_slugs)}})}
+
     result = []
     for p in products:
         d = product_to_dict(p)
-        d["tag_label"] = tag_map.get(p.get("tag"), p.get("tag")) if p.get("tag") else None
+        d["tag_label"]     = tag_map.get(p.get("tag"), p.get("tag")) if p.get("tag") else None
+        d["segment_name"]  = seg_map.get(p.get("segment")) if p.get("segment") else None
         result.append(d)
 
     return jsonify(result)
@@ -92,7 +99,7 @@ def get_product(product_id):
 def create_product():
     db   = get_db()
     data = request.get_json()
-    required = ["title", "promo_price", "affiliate_link"]
+    required = ["title", "price_from", "affiliate_link"]
     missing  = [f for f in required if not data.get(f)]
     if missing:
         return jsonify({"error": f"Campos obrigatórios: {', '.join(missing)}"}), 400
@@ -100,6 +107,9 @@ def create_product():
     doc    = make_product(data)
     result = db.products.insert_one(doc)
     doc["_id"] = result.inserted_id
+
+    notify_new_product(doc)
+
     return jsonify(product_to_dict(doc)), 201
 
 
@@ -112,7 +122,7 @@ def update_product(product_id):
         return jsonify({"error": "ID inválido"}), 400
 
     data      = request.get_json()
-    updatable = ["title", "description", "original_price", "promo_price",
+    updatable = ["title", "description", "price_from", "price_to",
                  "image_url", "affiliate_link", "category", "segment", "tag", "is_active"]
     updates   = {k: data[k] for k in updatable if k in data}
     updates["updated_at"] = datetime.now(timezone.utc)

@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, Link } from 'react-router-dom'
 import { login } from '../services/api'
 import { useAuth } from '../hooks/useAuth'
 import './LoginPage.css'
@@ -64,6 +64,7 @@ export default function LoginPage() {
             {loading ? 'Entrando...' : 'Entrar'}
           </button>
         </form>
+        <Link to="/" className="login-back">← Voltar à loja</Link>
       </div>
     </div>
   )

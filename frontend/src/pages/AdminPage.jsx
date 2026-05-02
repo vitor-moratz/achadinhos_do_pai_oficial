@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useMemo } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, Link } from 'react-router-dom'
 import {
   getProducts, createProduct, updateProduct, deleteProduct,
   getCategories, createCategory, getTags, createTag,
@@ -11,7 +11,7 @@ import { CustomSelect } from '../components/CustomSelect'
 import './AdminPage.css'
 
 const EMPTY_FORM = {
-  title: '', description: '', original_price: '', promo_price: '',
+  title: '', description: '', price_from: '', price_to: '',
   image_url: '', affiliate_link: '', segment: '', category: '', tag: '',
 }
 
@@ -134,8 +134,8 @@ export default function AdminPage() {
     setEditingProduct(product)
     setForm({
       title: product.title ?? '', description: product.description ?? '',
-      original_price: product.original_price?.toString() ?? '',
-      promo_price: product.promo_price?.toString() ?? '',
+      price_from: product.price_from?.toString() ?? '',
+      price_to: product.price_to?.toString() ?? '',
       image_url: product.image_url ?? '', affiliate_link: product.affiliate_link ?? '',
       segment: product.segment ?? '', category: product.category ?? '', tag: product.tag ?? '',
     })
@@ -175,7 +175,7 @@ export default function AdminPage() {
         ...prev,
         title: data.title || prev.title, description: data.description || prev.description,
         image_url: data.image_url || prev.image_url,
-        promo_price: data.promo_price?.toString() || prev.promo_price,
+        price_from: data.promo_price?.toString() || prev.price_from,
         affiliate_link: cleanUrl, segment: data.segment || prev.segment, category: data.category || prev.category,
       }))
       if (data.final_url) setFetchedUrl(data.final_url)
@@ -216,8 +216,8 @@ export default function AdminPage() {
       const payload = {
         ...form,
         affiliate_link: form.affiliate_link || shopeeUrl.trim(),
-        original_price: form.original_price ? parseFloat(form.original_price) : null,
-        promo_price: parseFloat(form.promo_price),
+        price_from: parseFloat(form.price_from),
+        price_to: form.price_to ? parseFloat(form.price_to) : null,
       }
       let saved
       if (editingProduct) {
@@ -278,7 +278,10 @@ export default function AdminPage() {
             {p.category && <span className="al-badge">{p.category}</span>}
             {p.tag_label && <span className="al-badge tag">{p.tag_label}</span>}
           </div>
-          <p className="ac-price">R$ {Number(p.promo_price).toFixed(2)}</p>
+          <p className="ac-price">
+            R$ {Number(p.price_from).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            {p.price_to && <> – R$ {Number(p.price_to).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</>}
+          </p>
         </div>
         <div className="ac-actions">
           <button className="al-btn al-edit" onClick={() => handleEdit(p)}>Editar</button>
@@ -294,10 +297,10 @@ export default function AdminPage() {
         <p className="al-title">{p.title}</p>
         <div className="al-actions">
           <button className="al-btn al-edit al-icon" onClick={() => handleEdit(p)} title="Editar">
-            <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+            <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
           </button>
           <button className="al-btn al-del al-icon" onClick={() => handleDelete(p.id)} title="Remover">
-            <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+            <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
           </button>
         </div>
       </div>
@@ -308,16 +311,17 @@ export default function AdminPage() {
     <div className="admin-page">
       <div className="admin-topbar">
         <div className="admin-topbar-left">
+          <Link to="/" className="admin-back-btn">← Voltar à loja</Link>
           <h1 className="admin-title">Gerenciar Produtos</h1>
           {user && (
             <span className={`admin-user-badge ${user.role}`}>
               {user.username} · {roleLabel(user.role)}
             </span>
           )}
+          <button className="admin-logout-btn" onClick={() => { logout(); navigate('/login') }}>
+            Sair
+          </button>
         </div>
-        <button className="admin-logout-btn" onClick={() => { logout(); navigate('/login') }}>
-          Sair
-        </button>
       </div>
 
       <div className="admin-tabs">
@@ -419,9 +423,29 @@ export default function AdminPage() {
               }
             </div>
           ) : viewMode === 'list' ? (
-            <div className="admin-list">
-              {filteredProducts.map((p) => <ProductRow key={p.id} p={p} />)}
-            </div>
+            filterSeg ? (
+              <div className="admin-list">
+                {filteredProducts.map((p) => <ProductRow key={p.id} p={p} />)}
+              </div>
+            ) : (
+              <div className="admin-segments">
+                {Array.from(groupedBySegment.entries()).map(([segSlug, prods]) => {
+                  const seg = segmentMeta[segSlug]
+                  return (
+                    <div key={segSlug} className="segment-group">
+                      <div className="segment-group-header">
+                        <span className="segment-group-icon">{seg?.icon ?? '📦'}</span>
+                        <h2 className="segment-group-title">{seg?.name ?? 'Sem segmento'}</h2>
+                        <span className="segment-group-count">{prods.length}</span>
+                      </div>
+                      <div className="admin-list">
+                        {prods.map((p) => <ProductRow key={p.id} p={p} />)}
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+            )
           ) : filterSeg ? (
             <div className="admin-cards">
               {filteredProducts.map((p) => <ProductCard key={p.id} p={p} />)}
@@ -540,9 +564,14 @@ export default function AdminPage() {
                 <label className="admin-label">Descrição
                   <textarea name="description" className="admin-input admin-textarea" value={form.description} onChange={handleChange} rows={3} placeholder="Breve descrição (opcional)" />
                 </label>
-                <label className="admin-label">Preço (R$) *
-                  <input name="promo_price" type="number" step="0.01" min="0" className="admin-input" value={form.promo_price} onChange={handleChange} required placeholder="Ex: 89.90" />
-                </label>
+                <div className="admin-price-row">
+                  <label className="admin-label">Valor Inicial (R$) *
+                    <input name="price_from" type="number" step="0.01" min="0" className="admin-input" value={form.price_from} onChange={handleChange} required placeholder="Ex: 89,90" />
+                  </label>
+                  <label className="admin-label">Valor Final (R$)
+                    <input name="price_to" type="number" step="0.01" min="0" className="admin-input" value={form.price_to} onChange={handleChange} placeholder="Ex: 129,90 (opcional)" />
+                  </label>
+                </div>
                 <label className="admin-label">URL da imagem
                   <input name="image_url" className="admin-input" value={form.image_url} onChange={handleChange} placeholder="https://..." />
                   {form.image_url && <img src={form.image_url} alt="preview" className="admin-img-preview" />}
@@ -568,7 +597,7 @@ export default function AdminPage() {
                     placeholder="Selecione uma categoria"
                     options={[
                       { value: '', label: 'Selecione uma categoria' },
-                      ...filteredCategories.map((c) => ({ value: c.name, label: `${c.icon} ${c.name}` })),
+                      ...filteredCategories.map((c) => ({ value: c.name, label: c.name })),
                     ]}
                   />
                   {!showAddCat ? (

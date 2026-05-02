@@ -89,25 +89,16 @@
   flex-wrap: wrap;
 }
 
-.pp-original {
-  font-size: 0.9rem;
-  color: var(--clr-text-muted);
-  text-decoration: line-through;
-}
-
 .pp-promo {
   font-size: 2rem;
   font-weight: 800;
   color: var(--clr-primary-dark);
 }
 
-.pp-discount {
-  background: var(--clr-primary);
-  color: var(--clr-white);
-  font-size: 0.8rem;
+.pp-price-sep {
+  font-size: 1.4rem;
   font-weight: 700;
-  padding: 4px 10px;
-  border-radius: 20px;
+  color: var(--clr-text-muted);
 }
 
 /* TRUST */

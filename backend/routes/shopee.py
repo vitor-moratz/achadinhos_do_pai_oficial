@@ -45,12 +45,15 @@ _SEGMENT_KEYWORDS = {
     "eletronicos":["eletrônicos", "computadores", "celulares", "smartphones",
                    "tablets", "câmeras", "áudio e vídeo", "tv", "wearables",
                    "acessórios para celular"],
-    "esporte":    ["esportes", "lazer", "fitness", "academia", "camping",
-                   "pesca", "ciclismo", "futebol", "corrida"],
     "games":      ["games", "videogame", "console", "drone", "impressão 3d",
                    "hobbies", "colecionáveis"],
-    "moda":       ["moda", "roupas", "calçados", "tênis", "sapatos", "relógios",
-                   "óculos", "bolsas", "acessórios de moda"],
+    # moda ANTES de esporte — calçados/roupas devem bater aqui primeiro
+    "moda":       ["moda", "roupas", "calçados", "calçado", "tênis", "sapato",
+                   "sandália", "sandalia", "chinelo", "bota", "scarpin",
+                   "relógios", "óculos", "bolsas", "acessórios de moda",
+                   "masculino", "feminino", "vestuário"],
+    "esporte":    ["esportes", "lazer", "fitness", "academia", "camping",
+                   "pesca", "ciclismo", "futebol", "corrida"],
 }
 
 _CATEGORY_KEYWORDS = {
@@ -111,10 +114,13 @@ _CATEGORY_KEYWORDS = {
         "Board Games":  ["board game", "jogo de tabuleiro", "card game"],
     },
     "moda": {
-        "Camisetas": ["camiseta", "camisa", "polo", "blusa"],
-        "Calçados":  ["tênis", "sapato", "sandália", "chinelo"],
+        "Camisetas": ["camiseta", "camisa", "polo", "blusa", "regata", "moletom"],
+        "Calçados":  ["tênis", "sapato", "sandália", "sandalia", "chinelo",
+                      "bota", "calçado", "scarpin", "mocassim", "sapatilha"],
         "Relógios":  ["relógio", "smartwatch"],
         "Óculos":    ["óculos", "lente"],
+        "Bolsas":    ["bolsa", "mochila", "carteira", "nécessaire"],
+        "Acessórios":["cinto", "colar", "brinco", "pulseira", "anel"],
     },
 }
 
@@ -193,16 +199,21 @@ def _fetch_via_ssr(
         if title:
             title = re.sub(r'\s*\|\s*Shopee.*$', '', title).strip()
 
-        # Imagem: og:image retorna banner promocional (promo-dim-).
-        # Prefere a primeira URL br-XXXXXXX do HTML (imagem real do produto).
+        # Imagem: busca qualquer arquivo susercontent (prefixos br-, sg-, th-, etc.)
+        # Prefere .webp pois tende a ser a imagem real do produto.
         real_imgs = re.findall(
-            r'https://[a-z.-]*susercontent\.com/file/(br-[a-zA-Z0-9._-]+)',
+            r'https://[a-z.-]*susercontent\.com/file/([a-z]{2}-[a-zA-Z0-9._-]+)',
             resp.text,
         )
         if real_imgs:
-            # Prefere .webp se disponível
+            # 1ª escolha: webp de qualquer origem
             webp = next((f for f in real_imgs if f.endswith(".webp")), None)
-            best = webp or real_imgs[0]
+            # 2ª escolha: qualquer imagem que não seja banner promo (evita "promo-dim")
+            non_promo = next(
+                (f for f in real_imgs if "promo" not in f and "banner" not in f),
+                None,
+            )
+            best = webp or non_promo or real_imgs[0]
             image_url = f"https://down-br.img.susercontent.com/file/{best}"
 
         # Preço: o SSR (facebookexternalhit) não inclui preço real — o bloco

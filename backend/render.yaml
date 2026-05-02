@@ -18,3 +18,17 @@ services:
         sync: false
       - key: SHOPEE_PARTNER_KEY
         sync: false
+      - key: TELEGRAM_BOT_TOKEN
+        sync: false          # token do bot do Telegram (@BotFather)
+      - key: TELEGRAM_CHAT_ID
+        sync: false          # ID do canal/grupo do Telegram
+      - key: ZAPI_INSTANCE_ID
+        sync: false          # ID da instância Z-API
+      - key: ZAPI_TOKEN
+        sync: false          # Token da instância Z-API
+      - key: ZAPI_CLIENT_TOKEN
+        sync: false          # Client-Token de segurança (painel Z-API, opcional)
+      - key: ZAPI_PHONE
+        sync: false          # Número ou ID do grupo WhatsApp (ex: 120363xxxxxxxxxx-group@g.us)
+      - key: SITE_URL
+        value: https://achadinhos-frontend.vercel.app  # URL pública do site

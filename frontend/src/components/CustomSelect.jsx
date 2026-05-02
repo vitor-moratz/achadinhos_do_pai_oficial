@@ -9,6 +9,7 @@ export function CustomSelect({
   className = '',
 }) {
   const [open, setOpen] = useState(false)
+  const [openUp, setOpenUp] = useState(false)
   const ref = useRef(null)
 
   const selected = options.find((o) => String(o.value) === String(value))
@@ -35,17 +36,26 @@ export function CustomSelect({
     return () => document.removeEventListener('keydown', handleKey, true)
   }, [open])
 
+  function handleToggle() {
+    if (!open && ref.current) {
+      const rect = ref.current.getBoundingClientRect()
+      const spaceBelow = window.innerHeight - rect.bottom
+      setOpenUp(spaceBelow < 260)
+    }
+    setOpen((o) => !o)
+  }
+
   const hasValue = value !== '' && value != null
 
   return (
     <div
-      className={`cselect${open ? ' cselect--open' : ''}${hasValue ? ' cselect--has-value' : ''}${className ? ' ' + className : ''}`}
+      className={`cselect${open ? ' cselect--open' : ''}${hasValue ? ' cselect--has-value' : ''}${openUp ? ' cselect--up' : ''}${className ? ' ' + className : ''}`}
       ref={ref}
     >
       <button
         type="button"
         className="cselect-trigger"
-        onClick={() => setOpen((o) => !o)}
+        onClick={handleToggle}
       >
         <span className="cselect-value">
           {selected ? selected.label : <span className="cselect-ph">{placeholder}</span>}

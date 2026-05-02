@@ -72,7 +72,12 @@
   max-height: 240px;
   overflow-y: auto;
 }
-
+/* abre para cima quando perto do fundo da tela */
+.cselect--up .cselect-list {
+  top: auto;
+  bottom: calc(100% + 4px);
+  box-shadow: 0 -6px 20px rgba(0, 0, 0, 0.10);
+}
 .cselect-opt {
   padding: 9px 12px;
   font-size: 0.875rem;

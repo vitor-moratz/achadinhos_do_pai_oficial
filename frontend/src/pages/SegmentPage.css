@@ -34,6 +34,7 @@
   padding: 32px 0 64px;
 }
 
+
 /* ── CATEGORY PILLS ─────────────────────────────────────── */
 .seg-cats {
   display: flex;
@@ -102,9 +103,33 @@
 
 /* ── RESPONSIVE ─────────────────────────────────────────── */
 @media (max-width: 600px) {
+  .seg-hero {
+    padding: 28px 0 24px;
+  }
+
+  .seg-hero-icon {
+    font-size: 2.2rem;
+  }
+
+  .seg-body {
+    padding: 20px 16px 48px;
+  }
+
+  .seg-cats {
+    gap: 7px;
+    margin-bottom: 20px;
+  }
+
+  .seg-cat-pill {
+    padding: 6px 13px;
+    font-size: 0.8rem;
+  }
+
   .seg-toolbar {
     flex-direction: column;
     align-items: flex-start;
+    gap: 10px;
+    margin-bottom: 16px;
   }
 
   .seg-search {

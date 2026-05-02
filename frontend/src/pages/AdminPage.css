@@ -49,6 +49,26 @@
   transition: border-color 0.2s, color 0.2s;
 }
 
+.admin-back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: none;
+  border: 1.5px solid var(--clr-border);
+  border-radius: var(--radius-sm);
+  padding: 6px 14px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--clr-text-muted);
+  text-decoration: none;
+  transition: border-color 0.2s, color 0.2s;
+}
+
+.admin-back-btn:hover {
+  border-color: var(--clr-primary);
+  color: var(--clr-primary);
+}
+
 .admin-logout-btn:hover {
   border-color: #EF4444;
   color: #EF4444;
@@ -206,7 +226,7 @@
 .al-edit {
   border-color: var(--clr-primary);
   color: var(--clr-primary);
-  background: transparent;
+  background: #FFF7ED;
 }
 
 .al-edit:hover {
@@ -217,7 +237,7 @@
 .al-del {
   border-color: #EF4444;
   color: #EF4444;
-  background: transparent;
+  background: #FEF2F2;
 }
 
 .al-del:hover {
@@ -238,6 +258,8 @@
   border-radius: var(--radius-md);
   overflow: hidden;
   transition: box-shadow 0.15s;
+  display: flex;
+  flex-direction: column;
 }
 
 .ac-card:hover {
@@ -268,6 +290,7 @@
 
 .ac-body {
   padding: 10px 12px 0;
+  flex: 1;
 }
 
 .ac-title {
@@ -343,7 +366,7 @@
   background: var(--clr-white);
   border-radius: var(--radius-md);
   width: 100%;
-  max-width: 560px;
+  max-width: 720px;
   margin: auto;
   box-shadow: 0 20px 60px rgba(0,0,0,0.2);
   display: flex;
@@ -435,6 +458,18 @@
 }
 
 .admin-textarea { resize: vertical; min-height: 80px; }
+
+.admin-price-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+@media (max-width: 480px) {
+  .admin-price-row {
+    grid-template-columns: 1fr;
+  }
+}
 
 .admin-field {
   display: flex;
@@ -559,9 +594,7 @@
 
 /* ── MOBILE ──────────────────────────────────────── */
 @media (max-width: 600px) {
-  .al-row { flex-wrap: wrap; }
-  .al-actions { width: 100%; }
-  .al-btn { flex: 1; text-align: center; }
+
   .admin-cards { grid-template-columns: repeat(2, 1fr); }
   .modal-footer { flex-direction: column-reverse; }
   .modal-footer .admin-btn-primary,
@@ -793,6 +826,7 @@
   flex: 1;
   min-width: 0;
   word-break: break-word;
+  overflow-wrap: break-word;
   margin: 0;
 }
 
@@ -803,13 +837,40 @@
 }
 
 .al-btn.al-icon {
-  width: 32px;
-  height: 32px;
+  width: 26px;
+  height: 26px;
   padding: 0;
   display: flex;
   align-items: center;
   justify-content: center;
   border-radius: var(--radius-sm);
+  transition: background 0.15s, color 0.15s;
+}
+
+.al-btn.al-icon.al-edit {
+  color: var(--clr-primary);
+  border-color: var(--clr-primary);
+  background: #FFF7ED;
+}
+
+.al-btn.al-icon.al-edit:hover {
+  background: var(--clr-primary);
+  color: #fff;
+}
+
+.al-btn.al-icon.al-del {
+  color: #EF4444;
+  border-color: #EF4444;
+  background: #FEF2F2;
+}
+
+.al-btn.al-icon.al-del:hover {
+  background: #EF4444;
+  color: #fff;
+}
+
+.al-row:hover .al-btn.al-icon {
+  opacity: 1;
 }
 
 /* ── LOADING SPINNER ─────────────────────────────── */
