@@ -171,18 +171,24 @@ export default function AdminPage() {
     try {
       const data = await fetchShopeeProduct(shopeeUrl.trim())
       const cleanUrl = data.final_url || shopeeUrl.trim()
+      const rawPrice = data.promo_price?.toString() || ''
+      // Mantém vírgula no campo de texto (formato brasileiro)
+      const parsedPrice = rawPrice ? rawPrice.replace('.', ',') : ''
       setForm((prev) => ({
         ...prev,
         title: data.title || prev.title, description: data.description || prev.description,
         image_url: data.image_url || prev.image_url,
-        price_from: data.promo_price?.toString() || prev.price_from,
-        affiliate_link: cleanUrl, segment: data.segment || prev.segment, category: data.category || prev.category,
+        price_from: parsedPrice || prev.price_from,
+        affiliate_link: shopeeUrl.trim(), segment: data.segment || prev.segment, category: data.category || prev.category,
       }))
       if (data.final_url) setFetchedUrl(data.final_url)
+      const priceMsg = parsedPrice
+        ? ` Verifique o preço — produtos com variantes podem mostrar o valor mínimo.`
+        : ` Preencha o preço manualmente.`
       setStatus({
         type: (data.title || data.image_url) ? 'success' : 'warn',
         msg: (data.title || data.image_url)
-          ? '✅ Dados importados! Revise as informações.'
+          ? `✅ Dados importados!${priceMsg}`
           : '🔗 URL resolvida. Preencha título, preço e imagem manualmente.',
       })
     } catch {
@@ -216,8 +222,8 @@ export default function AdminPage() {
       const payload = {
         ...form,
         affiliate_link: form.affiliate_link || shopeeUrl.trim(),
-        price_from: parseFloat(form.price_from),
-        price_to: form.price_to ? parseFloat(form.price_to) : null,
+        price_from: parseFloat(form.price_from.toString().replace(',', '.')),
+        price_to: form.price_to ? parseFloat(form.price_to.toString().replace(',', '.')) : null,
       }
       let saved
       if (editingProduct) {
@@ -553,6 +559,12 @@ export default function AdminPage() {
                     {fetching ? '...' : '🔍 Buscar'}
                   </button>
                 </div>
+                {shopeeUrl && !shopeeUrl.includes('s.shopee.com.br') && (
+                  <p className="shopee-warn">⚠️ <strong>Link sem afiliado!</strong> Use o link curto <code>s.shopee.com.br</code> gerado pelo app Shopee para garantir sua comissão.</p>
+                )}
+                {shopeeUrl && shopeeUrl.includes('s.shopee.com.br') && (
+                  <p className="shopee-ok">✅ Link de afiliado detectado.</p>
+                )}
                 {fetchedUrl && (
                   <p className="shopee-confirm">🔗 <a href={fetchedUrl} target="_blank" rel="noopener noreferrer">{fetchedUrl.replace(/^https?:\/\//, '').slice(0, 55)}…</a></p>
                 )}
@@ -566,10 +578,10 @@ export default function AdminPage() {
                 </label>
                 <div className="admin-price-row">
                   <label className="admin-label">Valor Inicial (R$) *
-                    <input name="price_from" type="number" step="0.01" min="0" className="admin-input" value={form.price_from} onChange={handleChange} required placeholder="Ex: 89,90" />
+                    <input name="price_from" type="text" inputMode="decimal" className="admin-input" value={form.price_from} onChange={handleChange} required placeholder="Ex: 89,90" />
                   </label>
                   <label className="admin-label">Valor Final (R$)
-                    <input name="price_to" type="number" step="0.01" min="0" className="admin-input" value={form.price_to} onChange={handleChange} placeholder="Ex: 129,90 (opcional)" />
+                    <input name="price_to" type="text" inputMode="decimal" className="admin-input" value={form.price_to} onChange={handleChange} placeholder="Ex: 129,90 (opcional)" />
                   </label>
                 </div>
                 <label className="admin-label">URL da imagem
@@ -643,7 +655,9 @@ export default function AdminPage() {
             </div>
             <div className="modal-footer">
               <button type="button" className="admin-btn-ghost" onClick={closeModal}>Cancelar</button>
-              <button type="submit" form="product-form" className="admin-btn-primary">
+              <button type="submit" form="product-form" className="admin-btn-primary"
+                disabled={shopeeUrl && !shopeeUrl.includes('s.shopee.com.br')}
+                title={shopeeUrl && !shopeeUrl.includes('s.shopee.com.br') ? 'Use um link s.shopee.com.br para garantir sua comissão' : ''}>
                 {editingProduct ? 'Salvar alterações' : 'Adicionar produto'}
               </button>
             </div>

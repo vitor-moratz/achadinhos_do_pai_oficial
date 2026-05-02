@@ -527,6 +527,29 @@
   word-break: break-all;
 }
 
+.shopee-warn {
+  font-size: 0.82rem;
+  color: #B91C1C;
+  background: #FEF2F2;
+  border: 1px solid #FECACA;
+  border-radius: 6px;
+  padding: 8px 10px;
+  margin-top: 6px;
+}
+
+.shopee-warn code {
+  background: #FEE2E2;
+  padding: 1px 5px;
+  border-radius: 4px;
+  font-size: 0.8rem;
+}
+
+.shopee-ok {
+  font-size: 0.82rem;
+  color: #15803D;
+  margin-top: 4px;
+}
+
 /* ── INLINE ADD ──────────────────────────────────── */
 .link-add {
   background: none;

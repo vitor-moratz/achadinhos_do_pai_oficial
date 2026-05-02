@@ -81,66 +81,72 @@ def _build_message(product: dict) -> str:
 
 
 def _send_telegram(message: str, image_url: str = ""):
-    if not TELEGRAM_BOT_TOKEN or not TELEGRAM_CHAT_ID:
+    token   = os.getenv("TELEGRAM_BOT_TOKEN", "")
+    chat_id = os.getenv("TELEGRAM_CHAT_ID", "")
+    if not token or not chat_id:
         return
-    base = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}"
-    try:
-        if image_url:
-            # Envia imagem sem caption
+    base = f"https://api.telegram.org/bot{token}"
+    if image_url:
+        try:
             resp = requests.post(f"{base}/sendPhoto", json={
-                "chat_id": TELEGRAM_CHAT_ID,
+                "chat_id": chat_id,
                 "photo":   image_url,
             }, timeout=10)
             if not resp.ok:
-                logger.warning("Telegram sendPhoto failed: %s — %s", resp.status_code, resp.text)
-        # Envia o texto separado
+                print(f"[notify] Telegram sendPhoto failed: {resp.status_code} — {resp.text}", flush=True)
+        except Exception as exc:
+            print(f"[notify] Telegram sendPhoto error: {exc}", flush=True)
+    try:
         resp = requests.post(f"{base}/sendMessage", json={
-            "chat_id":                  TELEGRAM_CHAT_ID,
+            "chat_id":                  chat_id,
             "text":                     message,
             "parse_mode":               "Markdown",
             "disable_web_page_preview": False,
         }, timeout=10)
         if not resp.ok:
-            logger.warning("Telegram sendMessage failed: %s — %s", resp.status_code, resp.text)
+            print(f"[notify] Telegram sendMessage failed: {resp.status_code} — {resp.text}", flush=True)
+        else:
+            print("[notify] Telegram OK", flush=True)
     except Exception as exc:
-        logger.warning("Telegram notification error: %s", exc)
+        print(f"[notify] Telegram sendMessage error: {exc}", flush=True)
 
 
 def _send_whatsapp(message: str, image_url: str = ""):
-    """Envia imagem (sem caption) + texto separado via Z-API."""
-    if not (ZAPI_INSTANCE_ID and ZAPI_TOKEN and ZAPI_PHONE):
+    instance     = os.getenv("ZAPI_INSTANCE_ID", "")
+    token        = os.getenv("ZAPI_TOKEN", "")
+    client_token = os.getenv("ZAPI_CLIENT_TOKEN", "")
+    phone        = os.getenv("ZAPI_PHONE", "")
+    if not (instance and token and phone):
         return
 
-    base    = f"https://api.z-api.io/instances/{ZAPI_INSTANCE_ID}/token/{ZAPI_TOKEN}"
+    base    = f"https://api.z-api.io/instances/{instance}/token/{token}"
     headers = {"Content-Type": "application/json"}
-    if ZAPI_CLIENT_TOKEN:
-        headers["Client-Token"] = ZAPI_CLIENT_TOKEN
+    if client_token:
+        headers["Client-Token"] = client_token
 
     try:
         if image_url:
-            # Envia imagem com caption (texto junto)
             resp = requests.post(f"{base}/send-image", json={
-                "phone":   ZAPI_PHONE,
+                "phone":   phone,
                 "image":   image_url,
                 "caption": message,
             }, headers=headers, timeout=10)
         else:
             resp = requests.post(f"{base}/send-text", json={
-                "phone":   ZAPI_PHONE,
+                "phone":   phone,
                 "message": message,
             }, headers=headers, timeout=10)
         if not resp.ok:
-            logger.warning("WhatsApp send failed: %s — %s", resp.status_code, resp.text)
+            print(f"[notify] WhatsApp failed: {resp.status_code} — {resp.text}", flush=True)
+        else:
+            print("[notify] WhatsApp OK", flush=True)
     except Exception as exc:
-        logger.warning("WhatsApp (Z-API) notification error: %s", exc)
+        print(f"[notify] WhatsApp error: {exc}", flush=True)
 
 
 def notify_new_product(product: dict):
-    """
-    Dispara notificações de Telegram e WhatsApp em background thread,
-    para não atrasar a resposta HTTP.
-    """
-    if not (TELEGRAM_BOT_TOKEN or (ZAPI_INSTANCE_ID and ZAPI_TOKEN and ZAPI_PHONE)):
+    """Dispara notificações em background thread para não atrasar a resposta HTTP."""
+    if not (os.getenv("TELEGRAM_BOT_TOKEN") or os.getenv("ZAPI_INSTANCE_ID")):
         return
 
     message   = _build_message(product)

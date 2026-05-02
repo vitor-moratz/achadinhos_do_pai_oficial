@@ -216,10 +216,16 @@ def _fetch_via_ssr(
             best = webp or non_promo or real_imgs[0]
             image_url = f"https://down-br.img.susercontent.com/file/{best}"
 
-        # Preço: o SSR (facebookexternalhit) não inclui preço real — o bloco
-        # de preço (section aria-live="polite") só é renderizado pelo React
-        # no browser. Deixa nulo para o usuário preencher manualmente.
+        # Preço: tenta extrair do HTML (R$XX,XX ou R$X.XXX,XX)
         price_brl = None
+        pm = re.search(r'R\$\s*([\d]+(?:\.\d{3})*,\d{2})', soup.get_text())
+        if pm:
+            raw_p = pm.group(1).replace('.', '').replace(',', '.')
+            try:
+                float(raw_p)
+                price_brl = pm.group(1)  # mantém formato "11,59"
+            except ValueError:
+                pass
 
         # Categorias via BreadcrumbList JSON-LD
         breadcrumb_names = []
@@ -327,8 +333,7 @@ def _fetch_via_open_api(shop_id: int, item_id: int) -> dict | None:
 def _resolve_short_url(session: requests.Session, url: str) -> str:
     """
     Resolve link afiliado curto (s.shopee.com.br) para URL real do produto.
-    Primeiro tenta o HTTP redirect (301/302); como fallback, extrai httpUrl do CONFIG JS.
-    Retorna a URL base do produto (sem query params de rastreamento).
+    Preserva query params (contêm rastreamento de afiliado).
     """
     try:
         # Passo 1: tenta sem follow redirects (pega Location do 301)
@@ -336,21 +341,21 @@ def _resolve_short_url(session: requests.Session, url: str) -> str:
         if resp.is_redirect:
             location = resp.headers.get("Location", "")
             if "shopee.com.br" in location:
-                return location.split("?")[0]
+                return location   # mantém query params
 
         # Passo 2: segue redirects e usa a URL final
         resp = session.get(url, headers=_HEADERS, timeout=10, allow_redirects=True)
         if "shopee.com.br" in resp.url:
-            return resp.url.split("?")[0]
+            return resp.url      # mantém query params
 
-        # Passo 3: fallback antigo — extrai httpUrl do CONFIG JS (links mais antigos)
+        # Passo 3: fallback — extrai httpUrl do CONFIG JS (links mais antigos)
         m = re.search(
             r'httpUrl\s*:\s*"(https:\\\/\\\/shopee\.com\.br\\\/[^"]+)"',
             resp.text,
         )
         if m:
             raw = m.group(1).replace("\\/", "/").replace("\\u0026", "&")
-            return raw.split("?")[0]
+            return raw
     except Exception:
         pass
     return url
