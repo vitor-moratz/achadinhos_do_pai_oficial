@@ -1,0 +1,20 @@
+services:
+  - type: web
+    name: achadinhos-backend
+    env: python
+    region: oregon
+    plan: free
+    rootDir: backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn "app:create_app()" --bind 0.0.0.0:$PORT --workers 2 --timeout 120
+    envVars:
+      - key: MONGODB_URI
+        sync: false          # preencher manualmente no painel do Render
+      - key: SECRET_KEY
+        generateValue: true  # gerado automaticamente pelo Render
+      - key: CORS_ORIGINS
+        value: https://achadinhos-frontend.vercel.app  # atualizar com URL real do Vercel
+      - key: SHOPEE_PARTNER_ID
+        sync: false
+      - key: SHOPEE_PARTNER_KEY
+        sync: false

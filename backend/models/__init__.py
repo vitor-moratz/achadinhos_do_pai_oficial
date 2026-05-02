@@ -1,4 +1,4 @@
-from models.product import Product
-from models.category import Category
-from models.tag import Tag
-from models.segment import Segment
+from models.product  import product_to_dict, make_product
+from models.category import category_to_dict, slugify
+from models.segment  import segment_to_dict
+from models.tag      import tag_to_dict

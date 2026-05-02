@@ -1,40 +1,39 @@
-from database import db
 from datetime import datetime, timezone
 
 
-class Product(db.Model):
-    __tablename__ = "products"
+def make_product(data: dict, now=None) -> dict:
+    now = now or datetime.now(timezone.utc)
+    return {
+        "title":          data["title"],
+        "description":    data.get("description"),
+        "original_price": data.get("original_price"),
+        "promo_price":    data["promo_price"],
+        "image_url":      data.get("image_url"),
+        "affiliate_link": data["affiliate_link"],
+        "category":       data.get("category"),
+        "segment":        data.get("segment"),
+        "tag":            data.get("tag"),
+        "is_active":      True,
+        "clicks":         0,
+        "created_at":     now,
+        "updated_at":     now,
+    }
 
-    id = db.Column(db.Integer, primary_key=True)
-    title = db.Column(db.String(255), nullable=False)
-    description = db.Column(db.Text, nullable=True)
-    original_price = db.Column(db.Float, nullable=True)
-    promo_price = db.Column(db.Float, nullable=False)
-    image_url = db.Column(db.String(500), nullable=True)
-    affiliate_link = db.Column(db.String(500), nullable=False)
-    category = db.Column(db.String(100), nullable=True)
-    segment = db.Column(db.String(100), nullable=True)
-    tag = db.Column(db.String(100), nullable=True)   # ex: "queima", "imperdivel", "novo"
-    is_active = db.Column(db.Boolean, default=True)
-    clicks = db.Column(db.Integer, default=0)
-    created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
-    updated_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc),
-                           onupdate=lambda: datetime.now(timezone.utc))
 
-    def to_dict(self):
-        return {
-            "id": self.id,
-            "title": self.title,
-            "description": self.description,
-            "original_price": self.original_price,
-            "promo_price": self.promo_price,
-            "image_url": self.image_url,
-            "affiliate_link": self.affiliate_link,
-            "category": self.category,
-            "segment": self.segment,
-            "tag": self.tag,
-            "is_active": self.is_active,
-            "clicks": self.clicks,
-            "created_at": self.created_at.isoformat(),
-            "updated_at": self.updated_at.isoformat(),
-        }
+def product_to_dict(doc: dict) -> dict:
+    return {
+        "id":             str(doc["_id"]),
+        "title":          doc.get("title"),
+        "description":    doc.get("description"),
+        "original_price": doc.get("original_price"),
+        "promo_price":    doc.get("promo_price"),
+        "image_url":      doc.get("image_url"),
+        "affiliate_link": doc.get("affiliate_link"),
+        "category":       doc.get("category"),
+        "segment":        doc.get("segment"),
+        "tag":            doc.get("tag"),
+        "is_active":      doc.get("is_active", True),
+        "clicks":         doc.get("clicks", 0),
+        "created_at":     doc["created_at"].isoformat() if doc.get("created_at") else None,
+        "updated_at":     doc["updated_at"].isoformat() if doc.get("updated_at") else None,
+    }

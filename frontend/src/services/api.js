@@ -1,7 +1,9 @@
 import axios from 'axios'
 
+// Em dev: proxy do Vite (/api → localhost:5000)
+// Em prod: VITE_API_URL aponta para o backend no Render
 const api = axios.create({
-  baseURL: '/api',
+  baseURL: import.meta.env.VITE_API_URL ? `${import.meta.env.VITE_API_URL}/api` : '/api',
 })
 
 export const getProducts = (params = {}) =>
