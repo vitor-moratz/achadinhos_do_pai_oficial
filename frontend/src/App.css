@@ -6,21 +6,11 @@
 
 .app-body {
   flex: 1;
+  display: flex;
+  align-items: flex-start;
 }
 
 .app-main {
-  margin-left: 190px;
+  flex: 1;
   min-width: 0;
-}
-
-@media (max-width: 768px) {
-  .app-main {
-    margin-left: 0;
-  }
-}
-
-@media (min-width: 769px) and (max-width: 1024px) {
-  .app-main {
-    margin-left: 160px;
-  }
 }

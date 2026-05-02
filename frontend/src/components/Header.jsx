@@ -1,19 +1,18 @@
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
-import { NavLink } from 'react-router-dom'
+import { Link, NavLink } from 'react-router-dom'
 import { WHATSAPP_URL, TELEGRAM_URL, INSTAGRAM_URL } from '../constants'
-import { TelegramIcon, InstagramIcon } from './SocialIcons'
+import { WhatsAppIcon, TelegramIcon, InstagramIcon } from './SocialIcons'
 import './Header.css'
 
 const SEGMENTS = [
-  { to: '/segmento/automotivo',  icon: '🚗', label: 'Automotivo' },
-  { to: '/segmento/casa',        icon: '🏠', label: 'Casa' },
-  { to: '/segmento/eletronicos', icon: '⚡', label: 'Eletrônicos' },
-  { to: '/segmento/esporte',     icon: '💪', label: 'Esporte' },
-  { to: '/segmento/ferramentas', icon: '🔧', label: 'Ferramentas' },
-  { to: '/segmento/games',       icon: '🎮', label: 'Games' },
-  { to: '/segmento/moda',        icon: '👔', label: 'Moda' },
-  { to: '/segmento/pet-shop',    icon: '🐾', label: 'Pet Shop' },
+  { to: '/segmento/automotivo',  label: 'Automotivo' },
+  { to: '/segmento/casa',        label: 'Casa' },
+  { to: '/segmento/eletronicos', label: 'Eletrônicos' },
+  { to: '/segmento/esporte',     label: 'Esporte' },
+  { to: '/segmento/ferramentas', label: 'Ferramentas' },
+  { to: '/segmento/games',       label: 'Games' },
+  { to: '/segmento/moda',        label: 'Moda' },
+  { to: '/segmento/pet-shop',    label: 'Pet Shop' },
 ]
 
 export default function Header() {
@@ -28,20 +27,7 @@ export default function Header() {
         </Link>
 
         <div className="header-social">
-          {TELEGRAM_URL && (
-            <a href={TELEGRAM_URL} target="_blank" rel="noopener noreferrer" className="header-social-icon" title="Telegram" aria-label="Telegram">
-              <TelegramIcon size={20} />
-            </a>
-          )}
-          <a href={INSTAGRAM_URL} target="_blank" rel="noopener noreferrer" className="header-social-icon" title="Instagram" aria-label="Instagram">
-            <InstagramIcon size={20} />
-          </a>
-          <a
-            href={WHATSAPP_URL}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="header-cta"
-          >
+          <a href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer" className="header-cta">
             Entrar no Grupo
           </a>
         </div>
@@ -49,7 +35,7 @@ export default function Header() {
         <button
           className="hamburger"
           onClick={() => setMenuOpen((o) => !o)}
-          aria-label="Menu"
+          aria-label={menuOpen ? 'Fechar menu' : 'Abrir menu'}
           aria-expanded={menuOpen}
         >
           <span /><span /><span />
@@ -57,29 +43,38 @@ export default function Header() {
       </div>
 
       {menuOpen && (
-        <div className="mobile-nav">
-          {SEGMENTS.map((seg) => (
-            <NavLink
-              key={seg.to}
-              to={seg.to}
-              className={({ isActive }) =>
-                isActive ? 'mobile-nav-link active' : 'mobile-nav-link'
-              }
-              onClick={() => setMenuOpen(false)}
-            >
-              {seg.label}
-            </NavLink>
-          ))}
-          <a
-            href={WHATSAPP_URL}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="header-cta mobile-cta"
-            onClick={() => setMenuOpen(false)}
-          >
-            Entrar no Grupo
-          </a>
-        </div>
+        <nav className="mobile-nav">
+          <p className="mobile-nav-section-label">Segmentos</p>
+          <div className="mobile-nav-links">
+            {SEGMENTS.map((seg) => (
+              <NavLink
+                key={seg.to}
+                to={seg.to}
+                className={({ isActive }) =>
+                  isActive ? 'mobile-nav-link active' : 'mobile-nav-link'
+                }
+                onClick={() => setMenuOpen(false)}
+              >
+                {seg.label}
+              </NavLink>
+            ))}
+          </div>
+
+          <p className="mobile-nav-section-label">Comunidade</p>
+          <div className="mobile-nav-social">
+            <a href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer" className="mobile-social-link whatsapp" onClick={() => setMenuOpen(false)}>
+              <WhatsAppIcon size={20} /> Grupo WhatsApp
+            </a>
+            {TELEGRAM_URL && (
+              <a href={TELEGRAM_URL} target="_blank" rel="noopener noreferrer" className="mobile-social-link telegram" onClick={() => setMenuOpen(false)}>
+                <TelegramIcon size={20} /> Canal no Telegram
+              </a>
+            )}
+            <a href={INSTAGRAM_URL} target="_blank" rel="noopener noreferrer" className="mobile-social-link instagram" onClick={() => setMenuOpen(false)}>
+              <InstagramIcon size={20} /> Instagram
+            </a>
+          </div>
+        </nav>
       )}
     </header>
   )
