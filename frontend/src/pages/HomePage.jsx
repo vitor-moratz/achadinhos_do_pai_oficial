@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
-import { getProducts, getSegments } from '../services/api'
+import { getProducts } from '../services/api'
 import { WHATSAPP_URL, TELEGRAM_URL, INSTAGRAM_URL } from '../constants'
 import { WhatsAppIcon, TelegramIcon, InstagramIcon } from '../components/SocialIcons'
 import ProductCard from '../components/ProductCard'
@@ -8,14 +8,12 @@ import './HomePage.css'
 
 export default function HomePage() {
   const [featured, setFeatured] = useState([])
-  const [segments, setSegments] = useState([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    Promise.all([getProducts(), getSegments()])
-      .then(([all, segs]) => {
+    getProducts()
+      .then((all) => {
         setFeatured(all.slice(0, 8))
-        setSegments(segs.slice().sort((a, b) => a.name.localeCompare(b.name, 'pt')))
       })
       .catch(() => {})
       .finally(() => setLoading(false))
@@ -63,28 +61,6 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ── SEGMENTS ─────────────────────────────────────── */}
-      <section className="section section--white">
-        <div className="container">
-          <h2 className="section-title">Explore por segmento</h2>
-          {segments.length === 0 ? (
-            <p className="state-text" style={{ padding: '20px 0' }}>Carregando...</p>
-          ) : (
-            <div className="segments-grid">
-              {segments.map((seg) => (
-                <Link key={seg.slug} to={`/segmento/${seg.slug}`} className="segment-card">
-                  <span className="seg-card-icon">{seg.icon}</span>
-                  <span className="seg-card-label">{seg.name}</span>
-                  {seg.description && (
-                    <span className="seg-card-desc">{seg.description}</span>
-                  )}
-                </Link>
-              ))}
-            </div>
-          )}
-        </div>
-      </section>
-
       {/* ── FEATURED PRODUCTS ────────────────────────────── */}
       <section className="section">
         <div className="container">
@@ -127,7 +103,6 @@ export default function HomePage() {
       <section className="section whatsapp-section">
         <div className="container">
           <div className="whatsapp-box">
-            <p className="wa-eyebrow">Não perca nenhum achado</p>
             <h2>Entre na comunidade e não perca nenhum achado</h2>
             <p className="wa-sub">
               Comunidade exclusiva com promoções diárias, novidades e achadinhos antes de todo mundo.
