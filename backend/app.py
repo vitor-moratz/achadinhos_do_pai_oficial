@@ -11,7 +11,7 @@ DEFAULT_SEGMENTS = [
     ("automotivo",  "Automotivo",              "\U0001f697", "Acessorios e cuidados para seu veiculo"),
     ("pet-shop",    "Pet Shop",                "\U0001f43e", "O melhor para seus bichinhos"),
     ("casa",        "Casa",                    "\U0001f3e0", "Organizacao, cozinha e tudo para o lar"),
-    ("eletronicos", "Eletronicos",             "\u26a1", "Gadgets e tecnologia com custo-beneficio"),
+    ("eletronicos", "Eletronicos",             "\u26a1", "Dispositivos inteligentes e tecnologia com custo-beneficio"),
     ("esporte",     "Esporte e Lazer",         "\U0001f4aa", "Para quem curte atividade fisica e aventura"),
     ("games",       "Games e Hobbies",         "\U0001f3ae", "Entretenimento e passatempos"),
     ("moda",        "Moda",                    "\U0001f454", "Roupas, calcados e acessorios para todos os estilos"),
@@ -41,9 +41,45 @@ def _slugify(text):
     return _re.sub(r"[^a-z0-9]+", "-", ascii_str.lower()).strip("-")
 
 
+def _dedup_collection(db, collection, key):
+    """Remove documentos duplicados mantendo o mais antigo por 'key'."""
+    pipeline = [
+        {"$group": {"_id": f"${key}", "ids": {"$push": "$_id"}, "count": {"$sum": 1}}},
+        {"$match": {"count": {"$gt": 1}}},
+    ]
+    for group in db[collection].aggregate(pipeline):
+        ids_to_delete = group["ids"][1:]
+        db[collection].delete_many({"_id": {"$in": ids_to_delete}})
+
+
 def _seed_defaults():
-    from pymongo.errors import DuplicateKeyError
+    from pymongo.errors import DuplicateKeyError, OperationFailure
     db = get_db()
+
+    # Garante índices únicos (ignora erro se já existir)
+    try:
+        db.categories.create_index("slug", unique=True, sparse=True)
+        db.segments.create_index("slug", unique=True, sparse=True)
+        db.tags.create_index("slug", unique=True, sparse=True)
+    except OperationFailure:
+        pass
+
+    # Remove categorias com slug no formato antigo (sem prefixo de segmento)
+    old_format = list(db.categories.find(
+        {"segment_slug": {"$ne": None, "$exists": True}}
+    ))
+    old_ids = [
+        c["_id"] for c in old_format
+        if c.get("segment_slug") and not c.get("slug", "").startswith(c["segment_slug"] + "-")
+    ]
+    if old_ids:
+        db.categories.delete_many({"_id": {"$in": old_ids}})
+
+    # Deduplica antes de inserir para evitar conflitos
+    _dedup_collection(db, "categories", "slug")
+    _dedup_collection(db, "segments", "slug")
+    _dedup_collection(db, "tags", "slug")
+
     for slug, name, icon, desc in DEFAULT_SEGMENTS:
         db.segments.update_one({"slug": slug}, {"$setOnInsert": {"slug": slug, "name": name, "icon": icon, "description": desc}}, upsert=True)
     for seg_slug, cats in DEFAULT_CATEGORIES.items():
