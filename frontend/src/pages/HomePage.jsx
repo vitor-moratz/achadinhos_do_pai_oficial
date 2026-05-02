@@ -15,7 +15,7 @@ export default function HomePage() {
     Promise.all([getProducts(), getSegments()])
       .then(([all, segs]) => {
         setFeatured(all.slice(0, 8))
-        setSegments(segs)
+        setSegments(segs.slice().sort((a, b) => a.name.localeCompare(b.name, 'pt')))
       })
       .catch(() => {})
       .finally(() => setLoading(false))
