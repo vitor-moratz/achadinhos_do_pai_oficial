@@ -34,4 +34,16 @@ export const createUser = (data) => api.post('/auth/users', data).then((r) => r.
 export const deleteUser = (id) => api.delete(`/auth/users/${id}`).then((r) => r.data)
 export const updateUserRole = (id, role) => api.patch(`/auth/users/${id}`, { role }).then((r) => r.data)
 
+// Affiliate / Galeria Shopee
+export const getAffiliateGaleria = (params = {}) =>
+  api.get('/affiliate/galeria', { params }).then((r) => r.data)
+export const getGaleriaTotalPaginas = (keyword = '', catId = '') =>
+  api.get('/affiliate/galeria/total-paginas', { params: { keyword, cat_id: catId } }).then((r) => r.data)
+export const importarAfiliados = (products) =>
+  api.post('/affiliate/importar', { products }).then((r) => r.data)
+export const importarTodos = (keyword = '', catId = '') =>
+  api.post('/affiliate/importar-tudo', { keyword, cat_id: catId }).then((r) => r.data)
+export const gerarLinkAfiliado = (url) =>
+  api.get('/affiliate/link', { params: { url } }).then((r) => r.data)
+
 export default api

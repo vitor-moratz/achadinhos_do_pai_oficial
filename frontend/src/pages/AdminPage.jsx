@@ -5,6 +5,7 @@ import {
   getCategories, createCategory, getTags, createTag,
   fetchShopeeProduct, getSegments,
   getUsers, createUser, deleteUser, updateUserRole,
+  getAffiliateGaleria, getGaleriaTotalPaginas, importarAfiliados, importarTodos,
 } from '../services/api'
 import { useAuth } from '../hooks/useAuth'
 import { CustomSelect } from '../components/CustomSelect'
@@ -55,6 +56,20 @@ export default function AdminPage() {
   const [userStatus, setUserStatus] = useState({ type: '', msg: '' })
   const [editingUserId, setEditingUserId] = useState(null)
 
+  // ── Galeria de afiliados ──────────────────────────────────
+  const [galeria, setGaleria]             = useState([])
+  const [galeriaPage, setGaleriaPage]     = useState(1)
+  const [galeriaLastPage, setGaleriaLastPage] = useState(null)
+  const [galeriaTotalPages, setGaleriaTotalPages] = useState(null)
+  const [galeriaTotalLoading, setGaleriaTotalLoading] = useState(false)
+  const [galeriaHasNext, setGaleriaHasNext] = useState(false)
+  const [galeriaKeyword, setGaleriaKeyword] = useState('')
+  const [galeriaFiltroStatus, setGaleriaFiltroStatus] = useState('todos') // 'todos' | 'importado' | 'nao_importado'
+  const [galeriaLoading, setGaleriaLoading] = useState(false)
+  const [galeriaImportingAll, setGaleriaImportingAll] = useState(false)
+  const [galeriaStatus, setGaleriaStatus] = useState({ type: '', msg: '' })
+  const [selectedItems, setSelectedItems] = useState(new Set())
+
   const loadAll = useCallback(() => {
     setLoading(true)
     Promise.all([getProducts(), getSegments(), getCategories(), getTags()])
@@ -70,6 +85,88 @@ export default function AdminPage() {
   useEffect(() => {
     if (activeTab === 'users' && isAdmin) getUsers().then(setUsers).catch(() => {})
   }, [activeTab, isAdmin])
+
+  const countGaleria = useCallback((keyword = '') => {
+    setGaleriaTotalPages(null)
+    setGaleriaTotalLoading(true)
+    getGaleriaTotalPaginas(keyword)
+      .then((data) => setGaleriaTotalPages(data.total_pages))
+      .catch(() => setGaleriaTotalPages('?'))
+      .finally(() => setGaleriaTotalLoading(false))
+  }, [])
+
+  const loadGaleria = useCallback((page = 1, keyword = '') => {
+    setGaleriaLoading(true)
+    setGaleriaStatus({ type: '', msg: '' })
+    getAffiliateGaleria({ page, limit: 20, keyword })
+      .then((data) => {
+        setGaleria(data.products || [])
+        setGaleriaPage(data.page || page)
+        setGaleriaHasNext(data.has_next || false)
+        if (!data.has_next) setGaleriaLastPage(data.page || page)
+        setSelectedItems(new Set())
+      })
+      .catch(() => setGaleriaStatus({ type: 'error', msg: 'Erro ao carregar a galeria Shopee.' }))
+      .finally(() => setGaleriaLoading(false))
+  }, [])
+
+  useEffect(() => {
+    if (activeTab === 'galeria') {
+      loadGaleria(1, galeriaKeyword)
+      countGaleria(galeriaKeyword)
+    }
+  }, [activeTab]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  async function handleImportarSelecionados() {
+    const items = galeria.filter((p) => selectedItems.has(p.itemId))
+    if (!items.length) return
+    setGaleriaStatus({ type: '', msg: '' })
+    try {
+      const res = await importarAfiliados(items)
+      setGaleriaStatus({
+        type: 'success',
+        msg: `✅ ${res.imported} importado(s), ${res.skipped} já existia(m).`,
+      })
+      setSelectedItems(new Set())
+      loadAll()
+      loadGaleria(galeriaPage, galeriaKeyword)
+    } catch {
+      setGaleriaStatus({ type: 'error', msg: 'Erro ao importar produtos.' })
+    }
+  }
+
+  async function handleImportarTodos() {
+    setGaleriaImportingAll(true)
+    setGaleriaStatus({ type: '', msg: '' })
+    try {
+      const res = await importarTodos(galeriaKeyword)
+      setGaleriaStatus({
+        type: 'success',
+        msg: `✅ Importação completa: ${res.imported} importado(s), ${res.skipped} já existia(m). (${res.pages_fetched} páginas)`,
+      })
+      loadAll()
+      loadGaleria(1, galeriaKeyword)
+    } catch {
+      setGaleriaStatus({ type: 'error', msg: 'Erro ao importar todos os produtos.' })
+    } finally {
+      setGaleriaImportingAll(false)
+    }
+  }
+
+  function toggleSelect(itemId) {
+    setSelectedItems((prev) => {
+      const next = new Set(prev)
+      if (next.has(itemId)) next.delete(itemId)
+      else next.add(itemId)
+      return next
+    })
+  }
+
+  function toggleSelectAll() {
+    const notImported = galeria.filter((p) => !p.already_imported)
+    if (selectedItems.size === notImported.length) setSelectedItems(new Set())
+    else setSelectedItems(new Set(notImported.map((p) => p.itemId)))
+  }
 
   useEffect(() => {
     function onKey(e) { if (e.key === 'Escape') closeModal() }
@@ -117,6 +214,12 @@ export default function AdminPage() {
     segments.forEach((s) => { m[s.slug] = s })
     return m
   }, [segments])
+
+  const galeriaFiltrada = useMemo(() => {
+    if (galeriaFiltroStatus === 'importado') return galeria.filter((p) => p.already_imported)
+    if (galeriaFiltroStatus === 'nao_importado') return galeria.filter((p) => !p.already_imported)
+    return galeria
+  }, [galeria, galeriaFiltroStatus])
 
   const hasFilters = filterSeg || filterCat || filterTag || filterText
 
@@ -334,6 +437,9 @@ export default function AdminPage() {
         <button className={`admin-tab${activeTab === 'products' ? ' active' : ''}`} onClick={() => setActiveTab('products')}>
           Produtos
         </button>
+        <button className={`admin-tab${activeTab === 'galeria' ? ' active' : ''}`} onClick={() => setActiveTab('galeria')}>
+          🛍️ Galeria Shopee
+        </button>
         {isAdmin && (
           <button className={`admin-tab${activeTab === 'users' ? ' active' : ''}`} onClick={() => setActiveTab('users')}>
             Usuários
@@ -476,6 +582,138 @@ export default function AdminPage() {
             </div>
           )}
         </>
+      )}
+
+      {activeTab === 'galeria' && (
+        <div className="admin-galeria">
+          <div className="galeria-header">
+            <h2 className="admin-section-title">Galeria de Produtos Shopee</h2>
+            <p className="galeria-hint">Selecione os produtos da galeria de afiliados para importar automaticamente ao site.</p>
+          </div>
+
+          {galeriaStatus.msg && (
+            <div className={`admin-status ${galeriaStatus.type}`}>{galeriaStatus.msg}</div>
+          )}
+
+          <div className="galeria-toolbar">
+            <div className="galeria-search">
+              <input
+                className="admin-input"
+                placeholder="🔍 Buscar na galeria..."
+                value={galeriaKeyword}
+                onChange={(e) => setGaleriaKeyword(e.target.value)}
+                onKeyDown={(e) => { if (e.key === 'Enter') { loadGaleria(1, galeriaKeyword); countGaleria(galeriaKeyword) } }}
+              />
+              <button className="admin-btn-secondary" onClick={() => { loadGaleria(1, galeriaKeyword); countGaleria(galeriaKeyword) }} disabled={galeriaLoading}>
+                Buscar
+              </button>
+            </div>
+            <div className="galeria-filtro-status">
+              {['todos', 'nao_importado', 'importado'].map((op) => (
+                <button
+                  key={op}
+                  className={`galeria-filtro-btn${galeriaFiltroStatus === op ? ' active' : ''}`}
+                  onClick={() => setGaleriaFiltroStatus(op)}
+                >
+                  {op === 'todos' ? 'Todos' : op === 'importado' ? '✅ Importados' : '🆕 Não importados'}
+                </button>
+              ))}
+            </div>
+            <div className="galeria-actions">
+              <button className="admin-btn-secondary" onClick={toggleSelectAll} disabled={galeriaLoading || galeriaImportingAll}>
+                {selectedItems.size > 0 ? 'Desmarcar todos' : 'Selecionar todos'}
+              </button>
+              {selectedItems.size > 0 && (
+                <button className="admin-btn-primary" onClick={handleImportarSelecionados} disabled={galeriaImportingAll}>
+                  ⬇️ Importar {selectedItems.size} selecionado(s)
+                </button>
+              )}
+              <button
+                className="admin-btn-danger"
+                onClick={() => { if (window.confirm('Importar TODOS os produtos da galeria (todas as páginas)? Isso pode demorar alguns minutos.')) handleImportarTodos() }}
+                disabled={galeriaLoading || galeriaImportingAll}
+                title="Importa todos os produtos de todas as páginas com os filtros ativos"
+              >
+                {galeriaImportingAll ? '⏳ Importando tudo...' : '📥 Importar Tudo'}
+              </button>
+            </div>
+          </div>
+
+          {galeriaLoading ? (
+            <div className="galeria-loading">Carregando galeria...</div>
+          ) : (
+            <>
+              <div className="galeria-grid">
+                {galeriaFiltrada.map((p) => {
+                  const selected  = selectedItems.has(p.itemId)
+                  const imported  = p.already_imported
+                  const priceMin  = p.priceMin ? Number(p.priceMin).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : null
+                  const priceMax  = p.priceMax && p.priceMax !== p.priceMin ? Number(p.priceMax).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : null
+                  const commission = p.commissionRate ? `${(parseFloat(p.commissionRate) * 100).toFixed(0)}%` : null
+
+                  return (
+                    <div
+                      key={p.itemId}
+                      className={`galeria-card${selected ? ' selected' : ''}${imported ? ' imported' : ''}`}
+                      onClick={() => !imported && toggleSelect(p.itemId)}
+                    >
+                      {imported && <div className="galeria-imported-badge">✅ Importado</div>}
+                      {selected && !imported && <div className="galeria-check">✓</div>}
+                      <div className="galeria-img">
+                        {p.imageUrl
+                          ? <img src={p.imageUrl} alt={p.productName} loading="lazy" />
+                          : <div className="galeria-img-placeholder">📦</div>
+                        }
+                      </div>
+                      <div className="galeria-info">
+                        <p className="galeria-name" title={p.productName}>{p.productName}</p>
+                        <div className="galeria-meta">
+                          {p.detected_segment && (
+                            <span className="al-badge">{p.detected_segment}</span>
+                          )}
+                          {commission && (
+                            <span className="al-badge comissao">{commission} comissão</span>
+                          )}
+                        </div>
+                        {priceMin && (
+                          <p className="galeria-price">
+                            R$ {priceMin}{priceMax ? ` – R$ ${priceMax}` : ''}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+
+              <div className="galeria-pagination">
+                <button
+                  className="admin-btn-secondary"
+                  disabled={galeriaPage <= 1 || galeriaLoading || galeriaImportingAll}
+                  onClick={() => loadGaleria(galeriaPage - 1, galeriaKeyword)}
+                >
+                  ← Anterior
+                </button>
+                <span className="galeria-page-info">
+                  Página {galeriaPage} de{' '}
+                  {galeriaTotalPages !== null
+                    ? galeriaTotalPages
+                    : galeriaTotalLoading
+                      ? '…'
+                      : galeriaLastPage ?? '?'
+                  }
+                </span>
+                <button
+                  className="admin-btn-secondary"
+                  disabled={!galeriaHasNext || galeriaLoading || galeriaImportingAll}
+                  onClick={() => loadGaleria(galeriaPage + 1, galeriaKeyword)}
+                >
+                  Próxima →
+                </button>
+              </div>
+            </>
+          )}
+        </div>
       )}
 
       {activeTab === 'users' && isAdmin && (

@@ -110,6 +110,7 @@ def create_app():
     from routes.shopee import shopee_bp
     from routes.segments import segments_bp
     from routes.auth import auth_bp
+    from routes.affiliate import affiliate_bp
 
     app.register_blueprint(products_bp)
     app.register_blueprint(categories_bp)
@@ -117,6 +118,7 @@ def create_app():
     app.register_blueprint(shopee_bp)
     app.register_blueprint(segments_bp)
     app.register_blueprint(auth_bp)
+    app.register_blueprint(affiliate_bp)
 
     with app.app_context():
         _seed_defaults()
